@@ -1,26 +1,37 @@
+#pragma once
+
+#include <Arduino.h>
+
+#include "Vector3.h"
+#include "Euler.h"
+
 class IMU
 {
 public:
 
-    bool begin();
+    IMU();
 
-    bool calibrate();
+    bool begin();
 
     bool update();
 
-    float roll() const;
-    float pitch() const;
-    float yaw() const;
+    bool calibrate();
 
-    const Euler& orientation() const;
+    bool healthy() const;
 
     const Vector3f& accel() const;
 
     const Vector3f& gyro() const;
 
-    bool healthy() const;
+    const Euler& orientation() const;
 
 private:
 
-    ...
+    bool initialized_;
+
+    Vector3f accel_;
+
+    Vector3f gyro_;
+
+    Euler orientation_;
 };

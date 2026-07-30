@@ -1,9 +1,22 @@
-void setup() {
-  // put your setup code here, to run once:
+#include "config.h"
+#include "lib\IMU\IMU.h"
 
+IMU imu;
+
+void setup()
+{
+    Serial.begin(115200);
+
+    if (imu.begin())
+    {
+        Serial.println("IMU OK");
+    }
+    else
+    {
+        Serial.println("IMU FAILED");
+    }
 }
-u:\ESP32 Projelerim\Torun Robot\Torun\lib\IMU\Vector3.h
-void loop() {
-  // put your main code here, to run repeatedly:
 
+void loop()
+{
 }
