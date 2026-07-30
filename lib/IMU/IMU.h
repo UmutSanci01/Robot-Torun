@@ -29,7 +29,7 @@ public:
 
 private:
 
-    MPU9250_WE sensor_;
+    MPU6500_WE sensor_;
 
     bool initialized_;
 

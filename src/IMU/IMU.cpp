@@ -44,6 +44,17 @@ bool IMU::update()
         return false;
     }
 
+    xyzFloat acc = sensor_.getGValues();
+    xyzFloat gyr = sensor_.getGyrValues();
+
+    accel_.x = acc.x;
+    accel_.y = acc.y;
+    accel_.z = acc.z;
+
+    gyro_.x = gyr.x;
+    gyro_.y = gyr.y;
+    gyro_.z = gyr.z;
+
     return true;
 }
 

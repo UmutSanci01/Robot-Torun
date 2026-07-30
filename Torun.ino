@@ -7,16 +7,35 @@ void setup()
 {
     Serial.begin(115200);
 
-    if (imu.begin())
+    if (!imu.begin())
     {
-        Serial.println("IMU OK");
+        Serial.println("IMU ERROR");
+
+        while (true)
+        {
+        }
     }
-    else
-    {
-        Serial.println("IMU FAILED");
-    }
+
+    Serial.println("IMU READY");
 }
 
 void loop()
 {
+    imu.update();
+
+    const Vector3f& a = imu.accel();
+    const Vector3f& g = imu.gyro();
+
+    Serial.printf(
+        "ACC : %7.3f %7.3f %7.3f | "
+        "GYR : %7.3f %7.3f %7.3f\n",
+        a.x,
+        a.y,
+        a.z,
+        g.x,
+        g.y,
+        g.z
+    );
+
+    delay(50);
 }
