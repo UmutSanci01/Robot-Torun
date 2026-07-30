@@ -138,3 +138,20 @@ const Euler& IMU::orientation() const
 {
     return orientation_;
 }
+
+GyroBias IMU::getGyroBias() const
+{
+    return
+    {
+        gyroBias_.x,
+        gyroBias_.y,
+        gyroBias_.z
+    };
+}
+
+void IMU::setGyroBias(const GyroBias& bias)
+{
+    gyroBias_.x = bias.x;
+    gyroBias_.y = bias.y;
+    gyroBias_.z = bias.z;
+}

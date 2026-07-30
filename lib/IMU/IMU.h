@@ -8,6 +8,13 @@
 #include "Vector3.h"
 #include "Euler.h"
 
+struct GyroBias
+{
+    float x;
+    float y;
+    float z;
+};
+
 class IMU
 {
 public:
@@ -29,6 +36,10 @@ public:
     const Vector3f& gyro() const;
 
     const Euler& orientation() const;
+
+    GyroBias getGyroBias() const;
+
+    void setGyroBias(const GyroBias& bias);
     
 
 private:
