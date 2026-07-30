@@ -1,52 +1,22 @@
-#include "config.h"
-#include "lib\IMU\IMU.h"
+#include "lib/IMU/Mahony.h"
 
-IMU imu;
+Mahony filter;
 
 void setup()
 {
     Serial.begin(115200);
 
-    if (!imu.begin())
-    {
-        Serial.println("IMU ERROR");
+    Euler e = filter.euler();
 
-        while (true)
-        {
-        }
-    }
-
-    Serial.println("IMU READY");
-
-    Serial.println("Calibrating IMU...");
-
-    imu.calibrate();
-
-    Serial.println("Calibration OK");
+    Serial.printf(
+        "%.2f %.2f %.2f\n",
+        e.roll,
+        e.pitch,
+        e.yaw
+    );
 }
 
 void loop()
 {
-    imu.update();
-
-    const Vector3f& a = imu.accel();
-    const Vector3f& g = imu.gyro();
-
-    Serial.printf(
-        "ACC : %7.3f %7.3f %7.3f | "
-        "GYR : %7.3f %7.3f %7.3f\n",
-        a.x,
-        a.y,
-        a.z,
-        g.x,
-        g.y,
-        g.z
-    );
-
-    Serial.printf(
-        "dt = %.6f\n",
-        imu.deltaTime()
-    );
-
-    delay(50);
+    
 }
