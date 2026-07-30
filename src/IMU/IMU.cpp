@@ -51,9 +51,9 @@ bool IMU::update()
     accel_.y = acc.y;
     accel_.z = acc.z;
 
-    gyro_.x = gyr.x;
-    gyro_.y = gyr.y;
-    gyro_.z = gyr.z;
+    gyro_.x = gyr.x - gyroBias_.x;
+    gyro_.y = gyr.y - gyroBias_.y;
+    gyro_.z = gyr.z - gyroBias_.z;
 
     return true;
 }
@@ -64,6 +64,23 @@ bool IMU::calibrate()
     {
         return false;
     }
+
+    gyroBias_.clear();
+
+    for(uint16_t i = 0; i < IMUConfig::CALIBRATION_SAMPLES; i++)
+    {
+        xyzFloat gyr = sensor_.getGyrValues();
+
+        gyroBias_.x += gyr.x;
+        gyroBias_.y += gyr.y;
+        gyroBias_.z += gyr.z;
+
+        delay(2);
+    }
+
+    gyroBias_.x /= IMUConfig::CALIBRATION_SAMPLES;
+    gyroBias_.y /= IMUConfig::CALIBRATION_SAMPLES;
+    gyroBias_.z /= IMUConfig::CALIBRATION_SAMPLES;
 
     return true;
 }

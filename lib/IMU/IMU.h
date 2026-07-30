@@ -36,6 +36,8 @@ private:
     Vector3f accel_;
 
     Vector3f gyro_;
+    
+    Vector3f gyroBias_;
 
     Euler orientation_;
 };

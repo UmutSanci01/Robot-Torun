@@ -17,6 +17,12 @@ void setup()
     }
 
     Serial.println("IMU READY");
+
+    Serial.println("Calibrating IMU...");
+
+    imu.calibrate();
+
+    Serial.println("Calibration OK");
 }
 
 void loop()
