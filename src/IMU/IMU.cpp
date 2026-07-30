@@ -5,6 +5,10 @@ IMU::IMU()
     :
     initialized_(false)
 {
+    gyroBias_.clear();
+
+    lastUpdateUs_ = 0;
+    deltaTime_ = 0.0f;
 }
 
 bool IMU::begin()
@@ -32,6 +36,8 @@ bool IMU::begin()
 
     sensor_.setGyrDLPF(MPU9250_DLPF_3);
 
+    lastUpdateUs_ = micros();
+
     initialized_ = true;
 
     return true;
@@ -43,6 +49,14 @@ bool IMU::update()
     {
         return false;
     }
+
+    uint32_t now = micros();
+
+    deltaTime_ =
+        (now - lastUpdateUs_) *
+        1.0e-6f;
+
+    lastUpdateUs_ = now;
 
     xyzFloat acc = sensor_.getGValues();
     xyzFloat gyr = sensor_.getGyrValues();
@@ -88,6 +102,11 @@ bool IMU::calibrate()
 bool IMU::healthy() const
 {
     return initialized_;
+}
+
+float IMU::deltaTime() const
+{
+    return deltaTime_;
 }
 
 const Vector3f& IMU::accel() const

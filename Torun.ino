@@ -43,5 +43,10 @@ void loop()
         g.z
     );
 
+    Serial.printf(
+        "dt = %.6f\n",
+        imu.deltaTime()
+    );
+
     delay(50);
 }

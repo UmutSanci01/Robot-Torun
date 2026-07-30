@@ -21,11 +21,14 @@ public:
 
     bool healthy() const;
 
+    float deltaTime() const;
+
     const Vector3f& accel() const;
 
     const Vector3f& gyro() const;
 
     const Euler& orientation() const;
+    
 
 private:
 
@@ -36,8 +39,12 @@ private:
     Vector3f accel_;
 
     Vector3f gyro_;
-    
+
     Vector3f gyroBias_;
 
     Euler orientation_;
+
+    uint32_t lastUpdateUs_;
+
+    float deltaTime_;
 };
