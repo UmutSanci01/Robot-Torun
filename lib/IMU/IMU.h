@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Wire.h>
+#include <MPU9250_WE.h>
 #include <Arduino.h>
 
 #include "Vector3.h"
@@ -26,6 +28,8 @@ public:
     const Euler& orientation() const;
 
 private:
+
+    MPU9250_WE sensor_;
 
     bool initialized_;
 

@@ -1,4 +1,5 @@
 #include "..\..\lib\IMU\IMU.h"
+#include "..\..\config.h"
 
 IMU::IMU()
     :
@@ -8,9 +9,32 @@ IMU::IMU()
 
 bool IMU::begin()
 {
+    Wire.begin(
+        Config::I2C_SDA_PIN,
+        Config::I2C_SCL_PIN
+    );
+
+    Wire.setClock(
+        Config::I2C_CLOCK
+    );
+
+    if (!sensor_.init())
+    {
+        initialized_ = false;
+        return false;
+    }
+
+    sensor_.setAccRange(MPU9250_ACC_RANGE_2G);
+
+    sensor_.setGyrRange(MPU9250_GYRO_RANGE_250);
+
+    sensor_.enableGyrDLPF();
+
+    sensor_.setGyrDLPF(MPU9250_DLPF_3);
+
     initialized_ = true;
 
-    return initialized_;
+    return true;
 }
 
 bool IMU::update()
