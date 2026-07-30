@@ -6,6 +6,7 @@
 
 #include "Vector3.h"
 #include "Euler.h"
+#include "Mahony.h"
 
 class IMU
 {
@@ -43,6 +44,8 @@ private:
     Vector3f gyroBias_;
 
     Euler orientation_;
+
+    Mahony filter_;
 
     uint32_t lastUpdateUs_;
 
