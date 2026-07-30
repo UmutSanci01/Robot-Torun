@@ -1,22 +1,26 @@
-#include "lib/IMU/Mahony.h"
+#include "lib/IMU/IMU.h"
 
-Mahony filter;
+IMU imu;
 
 void setup()
 {
     Serial.begin(115200);
 
-    Euler e = filter.euler();
-
-    Serial.printf(
-        "%.2f %.2f %.2f\n",
-        e.roll,
-        e.pitch,
-        e.yaw
-    );
+    imu.begin();
 }
 
 void loop()
 {
-    
+    imu.update();
+
+    const Euler& e = imu.orientation();
+
+    Serial.printf(
+        "R:%7.2f  P:%7.2f  Y:%7.2f\n",
+        e.roll,
+        e.pitch,
+        e.yaw
+    );
+
+    delay(50);
 }

@@ -3,10 +3,10 @@
 #include <Wire.h>
 #include <MPU9250_WE.h>
 #include <Arduino.h>
+#include <Adafruit_AHRS.h>
 
 #include "Vector3.h"
 #include "Euler.h"
-#include "Mahony.h"
 
 class IMU
 {
@@ -45,7 +45,7 @@ private:
 
     Euler orientation_;
 
-    Mahony filter_;
+    Adafruit_Mahony filter_;
 
     uint32_t lastUpdateUs_;
 

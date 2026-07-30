@@ -36,6 +36,8 @@ bool IMU::begin()
 
     sensor_.setGyrDLPF(MPU9250_DLPF_3);
 
+    filter_.begin(IMUConfig::UPDATE_RATE_HZ);
+
     lastUpdateUs_ = micros();
 
     initialized_ = true;
@@ -68,6 +70,19 @@ bool IMU::update()
     gyro_.x = gyr.x - gyroBias_.x;
     gyro_.y = gyr.y - gyroBias_.y;
     gyro_.z = gyr.z - gyroBias_.z;
+
+    filter_.updateIMU(
+        gyro_.x,
+        gyro_.y,
+        gyro_.z,
+        accel_.x,
+        accel_.y,
+        accel_.z
+    );
+
+    orientation_.roll  = filter_.getRoll();
+    orientation_.pitch = filter_.getPitch();
+    orientation_.yaw   = filter_.getYaw();
 
     return true;
 }
