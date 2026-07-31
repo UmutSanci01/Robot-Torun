@@ -1,26 +1,18 @@
-#include "lib/IMU/IMU.h"
+#include "lib\Encoder\Encoder.h"
 
-IMU imu;
+Encoder leftEncoder(32, 33);
+Encoder rightEncoder(25, 26);
 
 void setup()
 {
     Serial.begin(115200);
 
-    imu.begin();
+    leftEncoder.begin();
+    rightEncoder.begin();
+
+    Serial.println("Encoder OK");
 }
 
 void loop()
 {
-    imu.update();
-
-    const Euler& e = imu.orientation();
-
-    Serial.printf(
-        "R:%7.2f  P:%7.2f  Y:%7.2f\n",
-        e.roll,
-        e.pitch,
-        e.yaw
-    );
-
-    delay(50);
 }
