@@ -1,7 +1,7 @@
 #include "lib\Encoder\Encoder.h"
 
-Encoder leftEncoder(32, 33);
-Encoder rightEncoder(25, 26);
+Encoder leftEncoder(25, 26);
+Encoder rightEncoder(33, 32);
 
 void setup()
 {
@@ -15,4 +15,10 @@ void setup()
 
 void loop()
 {
+    Serial.printf(
+    "R:%ld   L:%ld\n",
+    rightEncoder.position(),
+    leftEncoder.position());
+
+    delay(100);
 }

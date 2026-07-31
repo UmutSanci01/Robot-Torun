@@ -36,8 +36,6 @@ private:
 
     bool initialized_;
 
-    int32_t position_;
-
     int32_t previousPosition_;
 
     int32_t delta_;
@@ -47,4 +45,18 @@ private:
     float velocity_;
 
     float distance_;
+
+    static Encoder* instance0_;
+    static Encoder* instance1_;
+
+    uint8_t instanceIndex_;
+
+    volatile int32_t position_;
+
+    volatile uint8_t previousState_;
+
+    static void IRAM_ATTR isr0();
+    static void IRAM_ATTR isr1();
+
+    void IRAM_ATTR handleInterrupt();
 };
