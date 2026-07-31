@@ -19,6 +19,9 @@ distance_(0.0f)
 
 bool Encoder::begin()
 {
+    pinMode(pinA_, INPUT_PULLUP);
+    pinMode(pinB_, INPUT_PULLUP);
+
     initialized_ = true;
     return true;
 }
