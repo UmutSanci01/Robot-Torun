@@ -9,7 +9,8 @@ public:
     Motor(
         uint8_t in1,
         uint8_t in2,
-        uint8_t enablePin
+        uint8_t enablePin,
+        uint8_t pwmChannel
     );
 
     bool begin();
@@ -33,4 +34,8 @@ private:
     bool enabled_;
 
     int8_t power_;
+
+    uint8_t pwmChannel_;
+    uint32_t pwmFrequency_;
+    uint8_t pwmResolution_;
 };
