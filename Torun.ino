@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#include "lib\Motor\Motor.h"
 #include "Button.h"
 #include "Menu.h"
 
@@ -17,10 +18,16 @@ Adafruit_SSD1306 display(
 Button btnUp(5);
 Button btnSelect(18);
 
+Motor leftMotor(25, 26, 14, 0);
+Motor rightMotor(32, 33, 14, 1);
+
 Menu menu(
     btnUp,
     btnSelect,
-    display);
+    display,
+    leftMotor,
+    rightMotor
+);
 
 void setup()
 {
@@ -35,6 +42,9 @@ void setup()
 
     btnUp.begin();
     btnSelect.begin();
+
+    leftMotor.begin();
+    rightMotor.begin();
 
     menu.begin();
 }

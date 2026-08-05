@@ -19,7 +19,7 @@ public:
 
     void disable();
 
-    bool enabled() const;
+    bool isEnabled() const;
 
     void setPower(int8_t power);
 

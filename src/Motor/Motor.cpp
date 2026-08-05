@@ -53,7 +53,7 @@ void Motor::disable()
     enabled_ = false;
 }
 
-bool Motor::enabled() const
+bool Motor::isEnabled() const
 {
     return enabled_;
 }

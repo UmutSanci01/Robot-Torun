@@ -3,12 +3,16 @@
 Menu::Menu(
     Button& btnUp,
     Button& btnSelect,
-    Adafruit_SSD1306& display
+    Adafruit_SSD1306& display,
+    Motor& leftMotor,
+    Motor& rightMotor
 )
 :
 btnUp_(btnUp),
 btnSelect_(btnSelect),
 display_(display),
+leftMotor_(leftMotor),
+rightMotor_(rightMotor),
 state_(State::MAIN),
 cursor_(0),
 redraw_(true)
@@ -23,21 +27,19 @@ bool Menu::begin()
 
 void Menu::update()
 {
-    switch(state_)
-    {
-        case State::MAIN:
-            updateMainMenu();
-            break;
+  switch(state_)
+  {
+      case State::MAIN:
+          updateMainMenu();
+          break;
 
-        default:
-            break;
-    }
+      case State::MOTOR_TEST:
+          updateMotorTest();
+          break;
 
-    if(redraw_)
-    {
-        drawMainMenu();
-        redraw_ = false;
-    }
+      default:
+          break;
+  }
 }
 
 void Menu::updateMainMenu()
@@ -58,6 +60,7 @@ void Menu::updateMainMenu()
         {
             case 0:
                 state_ = State::MOTOR_TEST;
+                redraw_ = true;
                 break;
 
             case 1:
@@ -100,4 +103,64 @@ void Menu::drawMainMenu()
     }
 
     display_.display();
+}
+
+void Menu::drawMotorTest()
+{
+    display_.clearDisplay();
+
+    display_.setCursor(0,0);
+    display_.println("Motor Test");
+
+    display_.println();
+
+    display_.print("Driver : ");
+
+    if(leftMotor_.isEnabled())
+        display_.println("ON");
+    else
+        display_.println("OFF");
+
+    display_.println();
+
+    display_.println("BTN2 Toggle");
+
+    display_.println("BTN1 Exit");
+
+    display_.display();
+}
+
+void Menu::updateMotorTest()
+{
+    if(btnSelect_.click)
+    {
+        if(leftMotor_.isEnabled())
+        {
+            leftMotor_.disable();
+            rightMotor_.disable();
+        }
+        else
+        {
+            leftMotor_.enable();
+            rightMotor_.enable();
+        }
+
+        redraw_ = true;
+    }
+
+    if(btnUp_.longPress)
+    {
+        leftMotor_.disable();
+        rightMotor_.disable();
+
+        state_ = State::MAIN;
+
+        redraw_ = true;
+    }
+
+    if(redraw_)
+    {
+        drawMotorTest();
+        redraw_ = false;
+    }
 }
