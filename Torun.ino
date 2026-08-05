@@ -21,12 +21,15 @@ Button btnSelect(18);
 Motor leftMotor(25, 26, 14, 0);
 Motor rightMotor(32, 33, 14, 1);
 
+Drive drive(
+    leftMotor,
+    rightMotor);
+
 Menu menu(
     btnUp,
     btnSelect,
     display,
-    leftMotor,
-    rightMotor
+    drive
 );
 
 void setup()
@@ -45,6 +48,8 @@ void setup()
 
     leftMotor.begin();
     rightMotor.begin();
+
+    drive.begin();
 
     menu.begin();
 }

@@ -4,7 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Button.h"
-#include "lib\Motor\Motor.h"
+#include "lib\Motor\Drive.h"
 
 class Menu
 {
@@ -14,8 +14,7 @@ public:
         Button& btnUp,
         Button& btnSelect,
         Adafruit_SSD1306& display,
-        Motor& leftMotor,
-        Motor& rightMotor
+        Drive& drive
     );
 
     bool begin();
@@ -44,8 +43,7 @@ private:
     Button& btnSelect_;
     Adafruit_SSD1306& display_;
 
-    Motor& leftMotor_;
-    Motor& rightMotor_;
+    Drive& drive_;
 
     uint8_t cursor_;
 

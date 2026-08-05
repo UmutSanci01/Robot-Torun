@@ -4,15 +4,13 @@ Menu::Menu(
     Button& btnUp,
     Button& btnSelect,
     Adafruit_SSD1306& display,
-    Motor& leftMotor,
-    Motor& rightMotor
+    Drive& drive
 )
 :
 btnUp_(btnUp),
 btnSelect_(btnSelect),
 display_(display),
-leftMotor_(leftMotor),
-rightMotor_(rightMotor),
+drive_(drive),
 state_(State::MAIN),
 cursor_(0),
 redraw_(true)
@@ -116,7 +114,7 @@ void Menu::drawMotorTest()
 
     display_.print("Driver : ");
 
-    if(leftMotor_.isEnabled())
+    if(drive_.enabled())
         display_.println("ON");
     else
         display_.println("OFF");
@@ -134,15 +132,13 @@ void Menu::updateMotorTest()
 {
     if(btnSelect_.click)
     {
-        if(leftMotor_.isEnabled())
+        if(drive_.enabled())
         {
-            leftMotor_.disable();
-            rightMotor_.disable();
+            drive_.disable();
         }
         else
         {
-            leftMotor_.enable();
-            rightMotor_.enable();
+            drive_.enable();
         }
 
         redraw_ = true;
@@ -150,8 +146,7 @@ void Menu::updateMotorTest()
 
     if(btnUp_.longPress)
     {
-        leftMotor_.disable();
-        rightMotor_.disable();
+        drive_.disable();
 
         state_ = State::MAIN;
 
