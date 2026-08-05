@@ -1,16 +1,23 @@
 #include "Menu.h"
 
-Menu::Menu(Button& btnUp, Button& btnSelect)
+Menu::Menu(
+    Button& btnUp,
+    Button& btnSelect,
+    Adafruit_SSD1306& display
+)
 :
 btnUp_(btnUp),
 btnSelect_(btnSelect),
+display_(display),
 state_(State::MAIN),
-cursor_(0)
+cursor_(0),
+redraw_(true)
 {
 }
 
 bool Menu::begin()
 {
+    drawMainMenu();
     return true;
 }
 
@@ -25,6 +32,12 @@ void Menu::update()
         default:
             break;
     }
+
+    if(redraw_)
+    {
+        drawMainMenu();
+        redraw_ = false;
+    }
 }
 
 void Menu::updateMainMenu()
@@ -36,7 +49,7 @@ void Menu::updateMainMenu()
         if(cursor_ > 2)
             cursor_ = 0;
 
-        drawMainMenu();
+        redraw_ = true;
     }
 
     if(btnSelect_.click)
@@ -55,10 +68,36 @@ void Menu::updateMainMenu()
                 state_ = State::IMU_TEST;
                 break;
         }
+
+        redraw_ = true;
     }
 }
 
 void Menu::drawMainMenu()
 {
-    // OLED kodu Commit 015'te gelecek.
+    display_.clearDisplay();
+
+    display_.setTextSize(1);
+    display_.setTextColor(SSD1306_WHITE);
+
+    const char* items[] =
+    {
+        "Motor Test",
+        "Encoder Test",
+        "IMU Test"
+    };
+
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        display_.setCursor(0, i * 16);
+
+        if(i == cursor_)
+            display_.print("> ");
+        else
+            display_.print("  ");
+
+        display_.println(items[i]);
+    }
+
+    display_.display();
 }
