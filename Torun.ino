@@ -1,24 +1,38 @@
-#include "lib\Encoder\Encoder.h"
+#include "lib/Motor/Motor.h"
 
-Encoder leftEncoder(25, 26);
-Encoder rightEncoder(33, 32);
+Motor leftMotor(26, 25, 14);
+Motor rightMotor(32, 33, 14);
 
 void setup()
 {
-    Serial.begin(115200);
+    leftMotor.begin();
+    rightMotor.begin();
 
-    leftEncoder.begin();
-    rightEncoder.begin();
+    leftMotor.enable();
+    rightMotor.enable();
 
-    Serial.println("Encoder OK");
+    digitalWrite(14, LOW);
 }
 
 void loop()
 {
-    Serial.printf(
-    "R:%ld   L:%ld\n",
-    rightEncoder.position(),
-    leftEncoder.position());
+    leftMotor.setPower(100);
+    rightMotor.setPower(100);
 
-    delay(100);
+    delay(2000);
+
+    leftMotor.stop();
+    rightMotor.stop();
+
+    delay(1000);
+
+    leftMotor.setPower(-100);
+    rightMotor.setPower(-100);
+
+    delay(2000);
+
+    leftMotor.stop();
+    rightMotor.stop();
+
+    delay(3000);
 }
