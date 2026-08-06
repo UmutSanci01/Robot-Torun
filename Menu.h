@@ -25,6 +25,8 @@ public:
 
     void drawMotorTest();
 
+    void drawMotorPower();
+
 private:
 
   enum class State

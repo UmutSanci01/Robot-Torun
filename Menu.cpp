@@ -19,6 +19,7 @@ redraw_(true)
 
 bool Menu::begin()
 {
+    redraw_ = false;
     drawMainMenu();
     return true;
 }
@@ -34,7 +35,17 @@ void Menu::update()
       case State::MOTOR_TEST:
           updateMotorTest();
           break;
+      case State::ENCODER_TEST:
+          state_ = State::MAIN;
+          redraw_ = true;
+          return;
+          break;
 
+      case State::IMU_TEST:
+          state_ = State::MAIN;
+          redraw_ = true;
+          return;
+          break;
       default:
           break;
   }
@@ -59,18 +70,27 @@ void Menu::updateMainMenu()
             case 0:
                 state_ = State::MOTOR_TEST;
                 redraw_ = true;
+                return;
                 break;
 
             case 1:
                 state_ = State::ENCODER_TEST;
+                return;
                 break;
 
             case 2:
                 state_ = State::IMU_TEST;
+                return;
                 break;
         }
 
         redraw_ = true;
+    }
+
+    if(redraw_)
+    {
+        drawMainMenu();
+        redraw_ = false;
     }
 }
 
@@ -132,25 +152,32 @@ void Menu::updateMotorTest()
 {
     if(btnSelect_.click)
     {
-        if(drive_.enabled())
-        {
-            drive_.disable();
-        }
-        else
+        if(!drive_.enabled())
         {
             drive_.enable();
         }
 
-        redraw_ = true;
+        int p = drive_.power();
+
+        if(p<100)
+            p+=5;
+
+        drive_.setPower(p);
+
+        redraw_=true;
     }
 
     if(btnUp_.longPress)
     {
+        drive_.stop();
+
         drive_.disable();
 
-        state_ = State::MAIN;
+        state_=State::MAIN;
 
-        redraw_ = true;
+        redraw_=true;
+
+        return;
     }
 
     if(redraw_)
@@ -158,4 +185,25 @@ void Menu::updateMotorTest()
         drawMotorTest();
         redraw_ = false;
     }
+}
+
+void Menu::drawMotorPower()
+{
+  display_.clearDisplay();
+
+  display_.setCursor(0,0);
+  display_.println("Motor Test");
+
+  display_.println();
+
+  display_.print("Power : ");
+  display_.println(drive_.power());
+
+  display_.println();
+
+  display_.println("BTN1 -");
+
+  display_.println("BTN2 +");
+
+  display_.display();
 }

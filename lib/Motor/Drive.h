@@ -27,8 +27,14 @@ public:
         int8_t right
     );
 
+    void setPower(int8_t power);
+
+    int8_t power() const;
+
 private:
 
     Motor& leftMotor_;
     Motor& rightMotor_;
+
+    int8_t power_;
 };

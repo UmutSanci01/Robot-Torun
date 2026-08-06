@@ -6,7 +6,8 @@ Drive::Drive(
 )
 :
 leftMotor_(leftMotor),
-rightMotor_(rightMotor)
+rightMotor_(rightMotor),
+power_(0)
 {
 }
 
@@ -46,3 +47,16 @@ void Drive::setPower(
     leftMotor_.setPower(left);
     rightMotor_.setPower(right);
 }
+
+void Drive::setPower(int8_t power)
+{
+    power_ = constrain(power,-100,100);
+
+    setPower(power_,power_);
+}
+
+int8_t Drive::power() const
+{
+    return power_;
+}
+
