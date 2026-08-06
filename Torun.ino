@@ -5,6 +5,7 @@
 #include "lib\Motor\Motor.h"
 #include "Button.h"
 #include "Menu.h"
+#include "lib\Encoder\Encoder.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -18,12 +19,18 @@ Adafruit_SSD1306 display(
 Button btnUp(5);
 Button btnSelect(18);
 
-Motor leftMotor(25, 26, 14, 0);
+Motor leftMotor(26, 25, 14, 0);
 Motor rightMotor(32, 33, 14, 1);
+Encoder leftEncoder(34, 35);
+Encoder rightEncoder(39, 36);
+
 
 Drive drive(
     leftMotor,
-    rightMotor);
+    rightMotor,
+    leftEncoder,
+    rightEncoder
+);
 
 Menu menu(
     btnUp,
@@ -51,6 +58,9 @@ void setup()
     leftMotor.begin();
     rightMotor.begin();
 
+    leftEncoder.begin();
+    rightEncoder.begin();
+
     drive.begin();
 
     menu.begin();
@@ -60,6 +70,9 @@ void loop()
 {
     btnUp.update();
     btnSelect.update();
+
+    leftEncoder.update();
+    rightEncoder.update();
 
     menu.update();
 }

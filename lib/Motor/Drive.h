@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "Motor.h"
+#include "..\Encoder\Encoder.h"
 
 class Drive
 {
@@ -9,7 +10,9 @@ public:
 
     Drive(
         Motor& leftMotor,
-        Motor& rightMotor
+        Motor& rightMotor,
+        Encoder& leftEncoder,
+        Encoder& rightEncoder
     );
 
     bool begin();
@@ -31,10 +34,19 @@ public:
 
     int8_t power() const;
 
+    float leftDistance() const;
+
+float rightDistance() const;
+
+void resetDistance();
+
 private:
 
     Motor& leftMotor_;
     Motor& rightMotor_;
+
+    Encoder& leftEncoder_;
+    Encoder& rightEncoder_;
 
     int8_t power_;
 };

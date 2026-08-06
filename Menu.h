@@ -51,6 +51,9 @@ private:
 
     bool redraw_;
 
+    uint32_t lastRefreshMs_;
+    static constexpr uint16_t REFRESH_INTERVAL_MS = 100;
+
     void updateMainMenu();
 
     void drawMainMenu();

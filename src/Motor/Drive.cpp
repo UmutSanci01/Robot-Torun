@@ -2,11 +2,15 @@
 
 Drive::Drive(
     Motor& leftMotor,
-    Motor& rightMotor
+    Motor& rightMotor,
+    Encoder& leftEncoder,
+    Encoder& rightEncoder
 )
 :
 leftMotor_(leftMotor),
 rightMotor_(rightMotor),
+leftEncoder_(leftEncoder),
+rightEncoder_(rightEncoder),
 power_(0)
 {
 }
@@ -60,3 +64,18 @@ int8_t Drive::power() const
     return power_;
 }
 
+float Drive::leftDistance() const
+{
+    return leftEncoder_.distance();
+}
+
+float Drive::rightDistance() const
+{
+    return rightEncoder_.distance();
+}
+
+void Drive::resetDistance()
+{
+    leftEncoder_.reset();
+    rightEncoder_.reset();
+}

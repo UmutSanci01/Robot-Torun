@@ -13,42 +13,54 @@ display_(display),
 drive_(drive),
 state_(State::MAIN),
 cursor_(0),
-redraw_(true)
+redraw_(true),
+lastRefreshMs_(0)
 {
 }
 
 bool Menu::begin()
 {
     redraw_ = false;
+    
+    lastRefreshMs_ = millis();
+
     drawMainMenu();
     return true;
 }
 
 void Menu::update()
 {
-  switch(state_)
-  {
-      case State::MAIN:
-          updateMainMenu();
-          break;
+    uint32_t now = millis();
 
-      case State::MOTOR_TEST:
-          updateMotorTest();
-          break;
-      case State::ENCODER_TEST:
-          state_ = State::MAIN;
-          redraw_ = true;
-          return;
-          break;
+    if (now - lastRefreshMs_ >= REFRESH_INTERVAL_MS)
+    {
+        lastRefreshMs_ = now;
+        redraw_ = true;
+    }
 
-      case State::IMU_TEST:
-          state_ = State::MAIN;
-          redraw_ = true;
-          return;
-          break;
-      default:
-          break;
-  }
+    switch(state_)
+    {
+        case State::MAIN:
+            updateMainMenu();
+            break;
+
+        case State::MOTOR_TEST:
+            updateMotorTest();
+            break;
+        case State::ENCODER_TEST:
+            state_ = State::MAIN;
+            redraw_ = true;
+            return;
+            break;
+
+        case State::IMU_TEST:
+            state_ = State::MAIN;
+            redraw_ = true;
+            return;
+            break;
+        default:
+            break;
+    }
 }
 
 void Menu::updateMainMenu()
@@ -141,9 +153,11 @@ void Menu::drawMotorTest()
 
     display_.println();
 
-    display_.println("BTN2 Toggle");
+    display_.print("L:");
+    display_.println(drive_.leftDistance(),3);
 
-    display_.println("BTN1 Exit");
+    display_.print("R:");
+    display_.println(drive_.rightDistance(),3);
 
     display_.display();
 }

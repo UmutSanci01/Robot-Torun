@@ -84,7 +84,11 @@ bool Encoder::healthy() const
 
 int32_t Encoder::position() const
 {
-    return position_;
+    noInterrupts();
+    int32_t p = position_;
+    interrupts();
+
+    return p;
 }
 
 int32_t Encoder::delta() const
@@ -102,20 +106,20 @@ float Encoder::velocity() const
     return velocity_;
 }
 
-float Encoder::distance() const
-{
-    return distance_;
-}
+// float Encoder::distance() const
+// {
+//     return distance_;
+// }
 
-void Encoder::reset()
-{
-    position_ = 0;
-    previousPosition_ = 0;
-    delta_ = 0;
-    rpm_ = 0.0f;
-    velocity_ = 0.0f;
-    distance_ = 0.0f;
-}
+// void Encoder::reset()
+// {
+//     position_ = 0;
+//     previousPosition_ = 0;
+//     delta_ = 0;
+//     rpm_ = 0.0f;
+//     velocity_ = 0.0f;
+//     distance_ = 0.0f;
+// }
 
 void IRAM_ATTR Encoder::isr0()
 {
@@ -144,14 +148,14 @@ void IRAM_ATTR Encoder::handleInterrupt()
         case 0b0111:
         case 0b1110:
         case 0b1000:
-            position_++;
+            count_++;
             break;
 
         case 0b0010:
         case 0b0100:
         case 0b1101:
         case 0b1011:
-            position_--;
+            count_--;
             break;
 
         default:
@@ -159,4 +163,26 @@ void IRAM_ATTR Encoder::handleInterrupt()
     }
 
     previousState_ = state;
+}
+
+int32_t Encoder::ticks() const
+{
+    return count_;
+}
+
+void Encoder::reset()
+{
+    noInterrupts();
+    count_ = 0;
+    interrupts();
+}
+
+float Encoder::revolutions() const
+{
+    return (float)ticks() / TICKS_PER_REV;
+}
+
+float Encoder::distance() const
+{
+    return revolutions() * PI * WHEEL_DIAMETER;
 }
