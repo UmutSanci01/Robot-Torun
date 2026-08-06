@@ -18,7 +18,8 @@ rpm_(0.0f),
 velocity_(0.0f),
 distance_(0.0f),
 instanceIndex_(255),
-previousState_(0)
+previousState_(0),
+previousUpdateMs_(0)
 {
 }
 
@@ -62,6 +63,7 @@ bool Encoder::begin()
             CHANGE);
     }
 
+    previousUpdateMs_ = millis();
     initialized_ = true;
 
     return true;
@@ -70,8 +72,25 @@ bool Encoder::begin()
 bool Encoder::update()
 {
     if (!initialized_)
-    {
         return false;
+
+    uint32_t now = millis();
+    uint32_t dt = now - previousUpdateMs_;
+
+    if (dt >= 100)
+    {
+        int32_t current = ticks();
+
+        delta_ = current - previousPosition_;
+        previousPosition_ = current;
+
+        float rev = (float)delta_ / ticksPerRevolution_;
+
+        rpm_ = rev * (60000.0f / dt);
+
+        velocity_ = rpm_ * (PI * wheelDiameter_) / 60.0f;
+
+        previousUpdateMs_ = now;
     }
 
     return true;
@@ -179,10 +198,34 @@ void Encoder::reset()
 
 float Encoder::revolutions() const
 {
-    return (float)ticks() / TICKS_PER_REV;
+    if (ticksPerRevolution_ <= 0.0f)
+        return 0.0f;
+
+    return (float)ticks() / ticksPerRevolution_;
 }
 
 float Encoder::distance() const
 {
-    return revolutions() * PI * WHEEL_DIAMETER;
+    return revolutions() * PI * wheelDiameter_;
+}
+
+
+void Encoder::setTicksPerRevolution(float ticks)
+{
+    ticksPerRevolution_ = ticks;
+}
+
+void Encoder::setWheelDiameter(float diameter)
+{
+    wheelDiameter_ = diameter;
+}
+
+float Encoder::ticksPerRevolution() const
+{
+    return ticksPerRevolution_;
+}
+
+float Encoder::wheelDiameter() const
+{
+    return wheelDiameter_;
 }

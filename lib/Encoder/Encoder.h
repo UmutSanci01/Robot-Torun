@@ -33,8 +33,19 @@ public:
 
     float distance() const;
 
-private:
+    void setTicksPerRevolution(float ticks);
 
+    void setWheelDiameter(float diameter);
+
+    float ticksPerRevolution() const;
+
+    float wheelDiameter() const;
+
+private:
+    uint32_t previousUpdateMs_;
+    float ticksPerRevolution_ = 1.0f;
+    float wheelDiameter_ = 1.0f;
+    
     uint8_t pinA_;
     uint8_t pinB_;
 

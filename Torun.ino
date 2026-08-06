@@ -61,6 +61,12 @@ void setup()
     leftEncoder.begin();
     rightEncoder.begin();
 
+    leftEncoder.setTicksPerRevolution(132.2f);
+    rightEncoder.setTicksPerRevolution(132.2f);
+
+    leftEncoder.setWheelDiameter(0.044f);
+    rightEncoder.setWheelDiameter(0.044f);
+
     drive.begin();
 
     menu.begin();
