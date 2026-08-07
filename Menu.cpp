@@ -48,15 +48,17 @@ void Menu::update()
             updateMotorTest();
             break;
         case State::ENCODER_TEST:
-            state_ = State::MAIN;
-            redraw_ = true;
-            return;
+            state_ = State::ENCODER_TEST;
+            updateEncoderTest();
             break;
 
         case State::IMU_TEST:
             state_ = State::MAIN;
             redraw_ = true;
             return;
+            break;
+        case State::ENCODER_SPEED_TEST:
+            updateEncoderSpeedTest();
             break;
         default:
             break;
@@ -69,7 +71,7 @@ void Menu::updateMainMenu()
     {
         cursor_++;
 
-        if(cursor_ > 2)
+        if(cursor_ > 3)
             cursor_ = 0;
 
         redraw_ = true;
@@ -89,8 +91,11 @@ void Menu::updateMainMenu()
                 state_ = State::ENCODER_TEST;
                 return;
                 break;
-
             case 2:
+                state_ = State::ENCODER_SPEED_TEST;
+                redraw_ = true;
+                return;
+            case 3:
                 state_ = State::IMU_TEST;
                 return;
                 break;
@@ -117,10 +122,11 @@ void Menu::drawMainMenu()
     {
         "Motor Test",
         "Encoder Test",
+        "Speed Test",
         "IMU Test"
     };
 
-    for(uint8_t i = 0; i < 3; i++)
+    for(uint8_t i = 0; i < 4; i++)
     {
         display_.setCursor(0, i * 16);
 
@@ -144,20 +150,18 @@ void Menu::drawMotorTest()
 
     display_.println();
 
-    display_.print("Driver : ");
-
-    if(drive_.enabled())
-        display_.println("ON");
-    else
-        display_.println("OFF");
-
-    display_.println();
-
     display_.print("L:");
-    display_.println(drive_.leftDistance(),3);
+    display_.println(drive_.leftEncoder().distance());
+    display_.println(" m/s");
 
     display_.print("R:");
-    display_.println(drive_.rightDistance(),3);
+    display_.println(drive_.rightEncoder().distance());
+    display_.println(" m/s");
+
+    display_.println();    
+    display_.print("Power ");
+    display_.print(drive_.power());
+    display_.println();
 
     display_.display();
 }
@@ -175,6 +179,23 @@ void Menu::updateMotorTest()
 
         if(p<100)
             p+=5;
+
+        drive_.setPower(p);
+
+        redraw_=true;
+    }
+
+    if (btnUp_.click)
+    {
+        if(!drive_.enabled())
+        {
+            drive_.enable();
+        }
+
+        int p = drive_.power();
+
+        if(p<100)
+            p-=5;
 
         drive_.setPower(p);
 
@@ -201,23 +222,124 @@ void Menu::updateMotorTest()
     }
 }
 
-void Menu::drawMotorPower()
+void Menu::drawEncoderSpeedTest()
 {
-  display_.clearDisplay();
+    display_.clearDisplay();
 
-  display_.setCursor(0,0);
-  display_.println("Motor Test");
+    display_.setCursor(0,0);
+    display_.println("Speed Test");
 
-  display_.println();
+    display_.print("L ");
+    display_.print(drive_.leftEncoder().rpm(),1);
+    display_.println(" rpm");
 
-  display_.print("Power : ");
-  display_.println(drive_.power());
+    display_.print("R ");
+    display_.print(drive_.rightEncoder().rpm(),1);
+    display_.println(" rpm");
 
-  display_.println();
+    display_.print("L ");
+    display_.print(drive_.leftEncoder().velocity(),2);
+    display_.println(" m/s");
 
-  display_.println("BTN1 -");
+    display_.print("R ");
+    display_.print(drive_.rightEncoder().velocity(),2);
+    display_.println(" m/s");
 
-  display_.println("BTN2 +");
+    display_.print("Power ");
+    display_.print(drive_.power());
+    display_.println();
 
-  display_.display();
+    display_.display();
+}
+
+void Menu::updateEncoderSpeedTest()
+{
+    if(btnSelect_.click)
+    {
+        if(!drive_.enabled())
+        {
+            drive_.enable();
+        }
+
+        int p = drive_.power();
+
+        if(p<100)
+            p+=5;
+
+        drive_.setPower(p);
+
+        redraw_=true;
+    }
+    if(btnUp_.longPress)
+    {
+        drive_.stop();
+        drive_.disable();
+
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    if(redraw_)
+    {
+        drawEncoderSpeedTest();
+        redraw_ = false;
+    }
+}
+
+void Menu::drawEncoderTest()
+{
+    display_.clearDisplay();
+
+    display_.setCursor(0,0);
+    display_.println("Encoder Test");
+
+    display_.print("L ");
+    display_.print(drive_.leftEncoder().ticks());
+    display_.println(" tick");
+
+    display_.print("R ");
+    display_.print(drive_.rightEncoder().ticks());
+    display_.println(" tick");
+
+    display_.print("Power ");
+    display_.print(drive_.power());
+    display_.println();
+
+    display_.display();
+}
+
+void Menu::updateEncoderTest()
+{
+        if(btnSelect_.click)
+    {
+        if(!drive_.enabled())
+        {
+            drive_.enable();
+        }
+
+        int p = drive_.power();
+
+        if(p<100)
+            p+=5;
+
+        drive_.setPower(p);
+
+        redraw_=true;
+    }
+    if(btnUp_.longPress)
+    {
+        drive_.stop();
+        drive_.disable();
+
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    if(redraw_)
+    {
+        drawEncoderTest();
+        redraw_ = false;
+    }
 }

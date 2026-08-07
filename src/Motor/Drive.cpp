@@ -54,7 +54,7 @@ void Drive::setPower(
 
 void Drive::setPower(int8_t power)
 {
-    power_ = constrain(power,-100,100);
+    power_ = constrain(power,-MotorConfig::MAX_POWER,MotorConfig::MAX_POWER);
 
     setPower(power_,power_);
 }
@@ -78,4 +78,44 @@ void Drive::resetDistance()
 {
     leftEncoder_.reset();
     rightEncoder_.reset();
+}
+
+void Drive::forward(int8_t power)
+{
+    setPower(power);
+}
+
+void Drive::backward(int8_t power)
+{
+    setPower(-power);
+}
+
+void Drive::rotateLeft(int8_t power)
+{
+    setPower(-power, power);
+}
+
+void Drive::rotateRight(int8_t power)
+{
+    setPower(power, -power);
+}
+
+void Drive::arc(int8_t leftPower, int8_t rightPower)
+{
+    setPower(leftPower, rightPower);
+}
+
+void Drive::brake()
+{
+    stop();
+}
+
+Encoder& Drive::leftEncoder()
+{
+    return leftEncoder_;
+}
+
+Encoder& Drive::rightEncoder()
+{
+    return rightEncoder_;
 }

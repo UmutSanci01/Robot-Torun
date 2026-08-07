@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "Motor.h"
 #include "..\Encoder\Encoder.h"
+#include "MotorConfig.h"
 
 class Drive
 {
@@ -36,9 +37,25 @@ public:
 
     float leftDistance() const;
 
-float rightDistance() const;
+    float rightDistance() const;
 
-void resetDistance();
+    void resetDistance();
+
+    void forward(int8_t power);
+
+    void backward(int8_t power);
+
+    void rotateLeft(int8_t power);
+
+    void rotateRight(int8_t power);
+
+    void arc(int8_t leftPower, int8_t rightPower);
+
+    void brake();
+
+    Encoder& leftEncoder();
+
+    Encoder& rightEncoder();
 
 private:
 

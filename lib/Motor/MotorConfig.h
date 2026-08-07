@@ -2,6 +2,7 @@
 
 namespace MotorConfig
 {
+    constexpr int8_t MAX_POWER = 80;
     constexpr uint32_t PWM_FREQUENCY = 20000;
     constexpr uint8_t PWM_RESOLUTION = 8;
 

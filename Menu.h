@@ -26,6 +26,12 @@ public:
     void drawMotorTest();
 
     void drawMotorPower();
+    void updateEncoderSpeedTest();
+    
+    void drawEncoderTest();
+    void updateEncoderTest();
+
+void drawEncoderSpeedTest();
 
 private:
 
@@ -36,7 +42,8 @@ private:
       MOTOR_ENABLE,
       MOTOR_PWM,
       ENCODER_TEST,
-      IMU_TEST
+      IMU_TEST,
+      ENCODER_SPEED_TEST
   };
 
     State state_;
