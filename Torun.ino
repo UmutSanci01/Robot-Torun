@@ -80,5 +80,7 @@ void loop()
     leftEncoder.update();
     rightEncoder.update();
 
+    drive.update();
+
     menu.update();
 }

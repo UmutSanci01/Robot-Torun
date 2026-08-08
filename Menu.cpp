@@ -53,8 +53,7 @@ void Menu::update()
             break;
 
         case State::IMU_TEST:
-            state_ = State::MAIN;
-            redraw_ = true;
+            updatePIDCalibration();
             return;
             break;
         case State::ENCODER_SPEED_TEST:
@@ -83,6 +82,10 @@ void Menu::updateMainMenu()
         {
             case 0:
                 state_ = State::MOTOR_TEST;
+
+                // drive_.setPIDTunings(2.0f, 0.0f, 0.0f);
+                // drive_.setTargetRPM(50, 50);
+
                 redraw_ = true;
                 return;
                 break;
@@ -123,7 +126,7 @@ void Menu::drawMainMenu()
         "Motor Test",
         "Encoder Test",
         "Speed Test",
-        "IMU Test"
+        "PID Calibration"
     };
 
     for(uint8_t i = 0; i < 4; i++)
@@ -150,13 +153,26 @@ void Menu::drawMotorTest()
 
     display_.println();
 
-    display_.print("L:");
-    display_.println(drive_.leftEncoder().distance());
-    display_.println(" m/s");
+    // display_.print("L:");
+    // display_.print(drive_.leftEncoder().distance());
+    // display_.println(" meter");
 
-    display_.print("R:");
-    display_.println(drive_.rightEncoder().distance());
-    display_.println(" m/s");
+    // display_.print("R:");
+    // display_.print(drive_.rightEncoder().distance());
+    // display_.println(" meter");
+    display_.print("PL:");
+    display_.println(drive_.leftPIDOutput());
+
+    display_.print("PR:");
+    display_.println(drive_.rightPIDOutput());
+
+    display_.print("L ");
+    display_.print(drive_.leftEncoder().rpm(),1);
+    display_.println(" rpm");
+
+    display_.print("R ");
+    display_.print(drive_.rightEncoder().rpm(),1);
+    display_.println(" rpm");
 
     display_.println();    
     display_.print("Power ");
@@ -178,7 +194,7 @@ void Menu::updateMotorTest()
         int p = drive_.power();
 
         if(p<100)
-            p+=5;
+            p+=1;
 
         drive_.setPower(p);
 
@@ -195,7 +211,7 @@ void Menu::updateMotorTest()
         int p = drive_.power();
 
         if(p<100)
-            p-=5;
+            p-=1;
 
         drive_.setPower(p);
 
@@ -222,6 +238,7 @@ void Menu::updateMotorTest()
     }
 }
 
+int target_adjusted = 0;
 void Menu::drawEncoderSpeedTest()
 {
     display_.clearDisplay();
@@ -245,8 +262,9 @@ void Menu::drawEncoderSpeedTest()
     display_.print(drive_.rightEncoder().velocity(),2);
     display_.println(" m/s");
 
-    display_.print("Power ");
-    display_.print(drive_.power());
+    display_.print("Target RPM ");
+    // display_.print(drive_.power());
+    display_.print(target_adjusted);
     display_.println();
 
     display_.display();
@@ -261,15 +279,53 @@ void Menu::updateEncoderSpeedTest()
             drive_.enable();
         }
 
-        int p = drive_.power();
+        // int p = drive_.power();
 
-        if(p<100)
-            p+=5;
+        // if(p<100)
+        //     p+=5;
 
-        drive_.setPower(p);
+        if (target_adjusted < 75)
+            target_adjusted += 5;
+
+        // drive_.setPower(p);
+
+        // drive_.setTargetRPM(
+        //     p,
+        //     p);
+        drive_.setTargetRPM(
+            target_adjusted,
+            target_adjusted);
 
         redraw_=true;
     }
+
+    if (btnUp_.click)
+    {
+        if(!drive_.enabled())
+        {
+            drive_.enable();
+        }
+
+        // int p = drive_.power();
+
+        // if(p<100)
+        //     p+=5;
+
+        if (target_adjusted > -75)
+            target_adjusted -= 5;
+
+        // drive_.setPower(p);
+
+        // drive_.setTargetRPM(
+        //     p,
+        //     p);
+        drive_.setTargetRPM(
+            target_adjusted,
+            target_adjusted);
+
+        redraw_=true;
+    }
+
     if(btnUp_.longPress)
     {
         drive_.stop();
@@ -340,6 +396,129 @@ void Menu::updateEncoderTest()
     if(redraw_)
     {
         drawEncoderTest();
+        redraw_ = false;
+    }
+}
+
+enum PIDValue
+{
+    kp,
+    ki,
+    kd
+};
+float values[3] = {0.f};
+int value_counter = 3;
+void Menu::drawPIDCalibration()
+{
+    display_.clearDisplay();
+    display_.setCursor(0,0);
+    display_.print("PID Calibration\n");
+    display_.println();
+
+    if (value_counter == 0)
+        display_.print("> ");
+    display_.print("Kp: ");
+    display_.println(values[PIDValue::kp], 1);
+    if (value_counter == 1)
+        display_.print("> ");
+    display_.print("Ki: ");   
+    display_.println(values[PIDValue::ki], 1);
+    if (value_counter == 2)
+        display_.print("> ");
+    display_.print("Kd: ");
+    display_.println(values[PIDValue::kd], 1); 
+
+    if (value_counter == 3)
+        display_.print("> ");
+    display_.print("Power: ");
+    display_.println(drive_.power());
+
+    display_.display();
+    redraw_ = true;
+}
+
+void Menu::updatePIDCalibration()
+{
+    if (btnUp_.click)
+    {
+        switch (value_counter):
+        {
+            case 0:
+                values[PIDValue::kp]++;
+                break;
+            case 1:
+                values[PIDValue::ki] += 0.1f;
+                break;
+            case 2:
+                values[PIDValue::kd] += 0.1f;
+                break;
+            case 3:
+                int p = drive_.power();
+
+                if (p > -100)
+                    p -= 1;
+
+                drive_.setPower(p);
+                break;
+            default:
+                break;
+        }
+
+        redraw_ = true;
+    }
+
+    if (btnSelect_.click)
+    {
+        switch (value_counter)
+        {
+            case 0:
+                if (values[PIDValue::kp] > 0)
+                    values[PIDValue::kp]--;
+                break;
+            case 1:
+                if (values[PIDValue::ki] > 0)
+                    values[PIDValue::ki] -= 0.1f;
+                break;
+            case 2:
+                if (values[PIDValue::kd] > 0)
+                    values[PIDValue::kd] -= 0.1f;
+                break;
+            case 3:
+                int p = drive_.power();
+
+                if (p < 100)
+                    p += 1;
+
+                drive_.setPower(p);
+                redraw_ = true;
+                break;
+            default:
+                break;
+        }
+
+        redraw_ = true;
+    }
+
+    if (btnSelect_.longPress)
+    {
+        value_counter++;
+        if (value_counter > 3)
+            value_counter = 0;
+    }
+
+    if (btnUp_.longPress)
+    {
+        drive_.stop();
+        drive_.disable();
+
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    if(redraw_)
+    {
+        drawPIDCalibration();
         redraw_ = false;
     }
 }

@@ -25,6 +25,11 @@ void PID::setTunings(float kp,float ki,float kd)
     kd_=kd;
 }
 
+float PID::kp() const
+{
+    return kp_;
+}
+
 void PID::setOutputLimits(float minimum,float maximum)
 {
     minOutput_=minimum;

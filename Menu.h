@@ -31,6 +31,9 @@ public:
     void drawEncoderTest();
     void updateEncoderTest();
 
+    void drawPIDCalibration();
+    void updatePIDCalibration();
+
 void drawEncoderSpeedTest();
 
 private:
@@ -60,6 +63,8 @@ private:
 
     uint32_t lastRefreshMs_;
     static constexpr uint16_t REFRESH_INTERVAL_MS = 100;
+
+    int pidTargetRPM_ = 0;
 
     void updateMainMenu();
 

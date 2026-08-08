@@ -4,6 +4,7 @@
 #include "Motor.h"
 #include "..\Encoder\Encoder.h"
 #include "MotorConfig.h"
+#include "../../PID.h"
 
 class Drive
 {
@@ -57,6 +58,20 @@ public:
 
     Encoder& rightEncoder();
 
+    void setTargetRPM(
+    float left,
+    float right);
+
+    void setPIDTunings(
+        float kp,
+        float ki,
+        float kd);
+
+    void update();
+
+    float leftPIDOutput() const;
+float rightPIDOutput() const;
+
 private:
 
     Motor& leftMotor_;
@@ -65,5 +80,12 @@ private:
     Encoder& leftEncoder_;
     Encoder& rightEncoder_;
 
+    PID leftPid_;
+    PID rightPid_;
+
+    float leftTargetRPM_;
+    float rightTargetRPM_;
+
+    uint32_t previousPidMs_;
     int8_t power_;
 };

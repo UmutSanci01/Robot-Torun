@@ -21,6 +21,8 @@ public:
 
     void reset();
 
+    float kp() const;
+
     float update(
         float input,
         float dt);
