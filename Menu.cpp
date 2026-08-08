@@ -441,7 +441,7 @@ void Menu::updatePIDCalibration()
 {
     if (btnUp_.click)
     {
-        switch (value_counter):
+        switch (value_counter)
         {
             case 0:
                 values[PIDValue::kp]++;
