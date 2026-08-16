@@ -163,11 +163,11 @@ void Menu::drawMotorTest()
     display_.print(' ');
     display_.println(rightRPM, 0);
 
-    display_.println("Current RPMs");
-    display_.print("R ");
-    display_.println(drive_.rightEncoder().rpm());
-    display_.print("L ");
-    display_.println(drive_.leftEncoder().rpm());
+    // display_.println("Current RPMs");
+    // display_.print("R ");
+    // display_.println(drive_.rightEncoder().rpm());
+    // display_.print("L ");
+    // display_.println(drive_.leftEncoder().rpm());
 
 
     // display_.print("L:");
@@ -493,11 +493,11 @@ void Menu::drawPIDCalibration()
     if (value_counter == 1)
         display_.print("> ");
     display_.print("Ki: ");   
-    display_.println(values[PIDValue::ki], 4);
+    display_.println(values[PIDValue::ki], 0);
     if (value_counter == 2)
         display_.print("> ");
     display_.print("Kd: ");
-    display_.println(values[PIDValue::kd], 2); 
+    display_.println(values[PIDValue::kd], 3); 
 
     display_.print("L ");
     display_.print(drive_.leftEncoder().rpm(),0);
@@ -523,6 +523,8 @@ void Menu::drawPIDCalibration()
 
 void Menu::updatePIDCalibration()
 {
+    bool tuningsChanged = false;
+
     if (btnUp_.click)
     {
         switch (value_counter)
@@ -535,7 +537,7 @@ void Menu::updatePIDCalibration()
                 values[PIDValue::ki] += 2.f;
                 break;
             case 2:
-                values[PIDValue::kd] += 0.01f;
+                values[PIDValue::kd] += 0.001f;
                 break;
             // case 3:
             // {
@@ -550,7 +552,7 @@ void Menu::updatePIDCalibration()
             default:
                 break;
         }
-
+        tuningsChanged = true;
         redraw_ = true;
     }
 
@@ -569,7 +571,7 @@ void Menu::updatePIDCalibration()
                 break;
             case 2:
                 if (values[PIDValue::kd] > 0)
-                    values[PIDValue::kd] -= 0.01f;
+                    values[PIDValue::kd] -= 0.001f;
                 break;
             // case 3:
             // {
@@ -585,7 +587,7 @@ void Menu::updatePIDCalibration()
             default:
                 break;
         }
-
+        tuningsChanged = true;
         redraw_ = true;
     }
 
@@ -608,13 +610,17 @@ void Menu::updatePIDCalibration()
         return;
     }
 
-    if(redraw_)
+    if (tuningsChanged) 
     {
         drive_.setPIDTunings(
             values[PIDValue::kp],
             values[PIDValue::ki],
             values[PIDValue::kd]
         );
+    }
+
+    if(redraw_)
+    {
         drawPIDCalibration();
         redraw_ = false;
     }
