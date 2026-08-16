@@ -48,29 +48,57 @@ void PID::reset()
     output_=0.0f;
 }
 
-float PID::update(float input,float dt)
+// float PID::update(float input,float dt)
+// {
+//     if(dt<=0.0f)
+//         return output_;
+
+//     float error=target_-input;
+
+//     if (!((output_ >= maxOutput_ && error > 0.0f) || (output_ <= minOutput_ && error < 0.0f))) {
+//         integral_ += error * dt;
+//     }
+
+//     // integral_+=error*dt;
+
+//     float derivative=
+//         (error-previousError_)/dt;
+
+//     output_=
+//         kp_*error+
+//         ki_*integral_+
+//         kd_*derivative;
+
+//     output_=constrain(
+//         output_,
+//         minOutput_,
+//         maxOutput_);
+
+//     previousError_=error;
+
+//     return output_;
+// }
+
+float PID::update(float input, float dt)
 {
-    if(dt<=0.0f)
+    if(dt <= 0.0f)
         return output_;
 
-    float error=target_-input;
+    float error = target_ - input;
 
-    integral_+=error*dt;
+    if (!((output_ >= maxOutput_ && error > 0.0f) || (output_ <= minOutput_ && error < 0.0f))) {
+        integral_ += error * dt;
+    }
 
-    float derivative=
-        (error-previousError_)/dt;
+    float derivative = (error - previousError_) / dt;
 
-    output_=
-        kp_*error+
-        ki_*integral_+
-        kd_*derivative;
+    float feedForward = (target_ / 75.0f) * 100.0f; 
 
-    output_=constrain(
-        output_,
-        minOutput_,
-        maxOutput_);
+    output_ = feedForward + (kp_ * error) + (ki_ * integral_) + (kd_ * derivative);
 
-    previousError_=error;
+    output_ = constrain(output_, minOutput_, maxOutput_);
+
+    previousError_ = error;
 
     return output_;
 }

@@ -44,7 +44,7 @@ void setup()
     Serial.begin(115200);
 
     Wire.begin();
-
+    Wire.setClock(400000);
     display.begin(
         SSD1306_SWITCHCAPVCC,
         0x3C);
@@ -68,6 +68,8 @@ void setup()
     rightEncoder.setWheelDiameter(0.044f);
 
     drive.begin();
+
+    drive.setTargetRPM(75, 75);
 
     menu.begin();
 }

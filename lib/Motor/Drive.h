@@ -70,7 +70,7 @@ public:
     void update();
 
     float leftPIDOutput() const;
-float rightPIDOutput() const;
+    float rightPIDOutput() const;
 
 private:
 

@@ -58,51 +58,89 @@ bool Motor::isEnabled() const
     return enabled_;
 }
 
+// void Motor::setPower(int8_t power)
+// {
+//     if (!enabled_)
+//         return;
+
+//     power_ = constrain(power, -100, 100);
+//     uint8_t duty = map(abs(power_), 0, 100, 0, 255);
+
+//     if (power_ > 0)
+//     {
+//       ledcDetachPin(in2_);
+
+//       ledcAttachPin(
+//           in1_,
+//           pwmChannel_);
+
+//       digitalWrite(in2_, LOW);
+
+//       ledcWrite(
+//           pwmChannel_,
+//           duty);
+//     }
+//     else if (power_ < 0)
+//     {
+//       ledcDetachPin(in1_);
+
+//       ledcAttachPin(
+//           in2_,
+//           pwmChannel_);
+
+//       digitalWrite(in1_, LOW);
+
+//       ledcWrite(
+//           pwmChannel_,
+//           duty);
+//     }
+//     else
+//     {
+//       ledcWrite(
+//           pwmChannel_,
+//           0);
+
+//       digitalWrite(in1_, LOW);
+//       digitalWrite(in2_, LOW);
+//     }
+// }
+
 void Motor::setPower(int8_t power)
 {
     if (!enabled_)
         return;
 
-    power_ = constrain(power, -100, 100);
-    uint8_t duty = map(abs(power_), 0, 100, 0, 255);
+    int8_t newPower = constrain(power, -100, 100);
+    uint8_t duty = map(abs(newPower), 0, 100, 0, 255);
 
-    if (power_ > 0)
+    if (newPower > 0 && power_ <= 0)
     {
-      ledcDetachPin(in2_);
-
-      ledcAttachPin(
-          in1_,
-          pwmChannel_);
-
-      digitalWrite(in2_, LOW);
-
-      ledcWrite(
-          pwmChannel_,
-          duty);
+        ledcDetachPin(in2_);
+        digitalWrite(in2_, LOW); // Boşa çıkan pini sıfırla ki kısa devre/kaçak yapmasın
+        ledcAttachPin(in1_, pwmChannel_);
     }
-    else if (power_ < 0)
+    else if (newPower < 0 && power_ >= 0)
     {
-      ledcDetachPin(in1_);
-
-      ledcAttachPin(
-          in2_,
-          pwmChannel_);
-
-      digitalWrite(in1_, LOW);
-
-      ledcWrite(
-          pwmChannel_,
-          duty);
+        ledcDetachPin(in1_);
+        digitalWrite(in1_, LOW);
+        ledcAttachPin(in2_, pwmChannel_);
     }
-    else
+    else if (newPower == 0 && power_ != 0)
     {
-      ledcWrite(
-          pwmChannel_,
-          0);
-
-      digitalWrite(in1_, LOW);
-      digitalWrite(in2_, LOW);
+        ledcDetachPin(in1_);
+        ledcDetachPin(in2_);
+        digitalWrite(in1_, LOW);
+        digitalWrite(in2_, LOW);
+        
+        ledcWrite(pwmChannel_, 0);
     }
+
+    if (newPower != 0)
+    {
+        ledcWrite(pwmChannel_, duty);
+    }
+
+    power_ = newPower;
 }
 
 void Motor::stop()

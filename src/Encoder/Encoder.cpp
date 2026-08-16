@@ -77,7 +77,7 @@ bool Encoder::update()
     uint32_t now = millis();
     uint32_t dt = now - previousUpdateMs_;
 
-    if (dt >= 100)
+    if (dt >= 20)
     {
         int32_t current = ticks();
 

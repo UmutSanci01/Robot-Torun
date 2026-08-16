@@ -45,7 +45,7 @@ private:
       MOTOR_ENABLE,
       MOTOR_PWM,
       ENCODER_TEST,
-      IMU_TEST,
+      PID_CALIBRATION,
       ENCODER_SPEED_TEST
   };
 
@@ -62,7 +62,7 @@ private:
     bool redraw_;
 
     uint32_t lastRefreshMs_;
-    static constexpr uint16_t REFRESH_INTERVAL_MS = 100;
+    static constexpr uint16_t REFRESH_INTERVAL_MS = 300;
 
     int pidTargetRPM_ = 0;
 
