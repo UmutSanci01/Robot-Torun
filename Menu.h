@@ -5,6 +5,7 @@
 #include <Adafruit_SSD1306.h>
 #include "Button.h"
 #include "lib\Motor\Drive.h"
+#include "lib\IMU\IMU.h"
 
 class Menu
 {
@@ -14,7 +15,8 @@ public:
         Button& btnUp,
         Button& btnSelect,
         Adafruit_SSD1306& display,
-        Drive& drive
+        Drive& drive,
+        IMU& imu
     );
 
     bool begin();
@@ -56,6 +58,7 @@ private:
     Adafruit_SSD1306& display_;
 
     Drive& drive_;
+    IMU& imu_;
 
     uint8_t cursor_;
 

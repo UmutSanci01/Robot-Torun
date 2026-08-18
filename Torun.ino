@@ -6,6 +6,7 @@
 #include "Button.h"
 #include "Menu.h"
 #include "lib\Encoder\Encoder.h"
+#include "lib\IMU\IMU.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -32,11 +33,14 @@ Drive drive(
     rightEncoder
 );
 
+IMU imu;
+
 Menu menu(
     btnUp,
     btnSelect,
     display,
-    drive
+    drive,
+    imu
 );
 
 void setup()
@@ -68,6 +72,7 @@ void setup()
     rightEncoder.setWheelDiameter(0.044f);
 
     drive.begin();
+    imu.begin();
 
     drive.setTargetRPM(0, 0);
 
@@ -82,6 +87,7 @@ void loop()
     leftEncoder.update();
     rightEncoder.update();
 
+    imu.update();
     drive.update();
 
     menu.update();

@@ -4,13 +4,15 @@ Menu::Menu(
     Button& btnUp,
     Button& btnSelect,
     Adafruit_SSD1306& display,
-    Drive& drive
+    Drive& drive,
+    IMU& imu
 )
 :
 btnUp_(btnUp),
 btnSelect_(btnSelect),
 display_(display),
 drive_(drive),
+imu_(imu),
 state_(State::MAIN),
 cursor_(0),
 redraw_(true),
