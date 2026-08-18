@@ -65,7 +65,7 @@ private:
     bool redraw_;
 
     uint32_t lastRefreshMs_;
-    static constexpr uint16_t REFRESH_INTERVAL_MS = 350;
+    static constexpr uint16_t REFRESH_INTERVAL_MS = 500;
 
     int pidTargetRPM_ = 0;
 

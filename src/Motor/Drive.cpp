@@ -78,6 +78,9 @@ void Drive::stop()
 {
     leftMotor_.stop();
     rightMotor_.stop();
+
+    leftPid_.reset();
+    rightPid_.reset();
 }
 
 void Drive::setPower(

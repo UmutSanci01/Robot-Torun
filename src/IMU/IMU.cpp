@@ -30,7 +30,7 @@ bool IMU::begin()
 
     sensor_.setAccRange(MPU9250_ACC_RANGE_2G);
 
-    sensor_.setGyrRange(MPU9250_GYRO_RANGE_250);
+    sensor_.setGyrRange(MPU9250_GYRO_RANGE_1000);
 
     sensor_.enableGyrDLPF();
 
@@ -71,13 +71,18 @@ bool IMU::update()
     gyro_.y = gyr.y - gyroBias_.y;
     gyro_.z = gyr.z - gyroBias_.z;
 
+    if (abs(gyro_.z) < 0.55f) gyro_.z = 0.0f;
+    if (abs(gyro_.x) < 0.55f) gyro_.x = 0.0f;
+    if (abs(gyro_.y) < 0.55f) gyro_.y = 0.0f;
+
     filter_.updateIMU(
         gyro_.x,
         gyro_.y,
         gyro_.z,
         accel_.x,
         accel_.y,
-        accel_.z
+        accel_.z,
+        deltaTime_
     );
 
     orientation_.roll  = filter_.getRoll();

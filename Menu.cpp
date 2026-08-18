@@ -271,13 +271,53 @@ void Menu::updateRobotConfig()
     }
 }
 
+float Kp_Degree = 1.0f;
+bool isTurning = false;
+bool isTurningStart = false;
+void rotateIMU(float _targetDegree, IMU& imu, Drive& drive) {
+    float currDegree = imu.orientation().yaw; //
+    float degreeErr = _targetDegree - currDegree;
 
+    while (degreeErr > 180.0f) degreeErr -= 360.0f;
+    while (degreeErr < -180.0f) degreeErr += 360.0f;
+
+    float targetRPM = degreeErr * Kp_Degree;
+
+    targetRPM = constrain(targetRPM, -75.0f, 75.0f);
+
+    if (abs(degreeErr) < .1f) {
+        // drive.setTargetRPM(0, 0);
+        drive.stop();
+        drive.disable();
+
+        isTurningStart = false;
+        isTurning = false;
+    } else {
+        drive.setTargetRPM(targetRPM, -targetRPM);
+    }
+}
+
+uint32_t turnDelay = .0f;
+float targetDegree = .0f;
 void Menu::drawIMUTest()
 {
     display_.clearDisplay();
 
     display_.setCursor(0,0);
     display_.println("IMU Test");
+    
+    display_.printf("Kp: %.1f | Tg: %.1f\n", Kp_Degree, targetDegree);
+    
+    display_.printf("Roll : %.1f\n", imu_.orientation().roll);
+    display_.printf("Pitch: %.1f\n", imu_.orientation().pitch);
+    display_.printf("Yaw  : %.1f\n", imu_.orientation().yaw);
+
+    display_.println();
+
+    if (isTurning)
+    {
+        display_.println("TURNING...");
+    }
 
     display_.display();
 }
@@ -286,16 +326,26 @@ void Menu::updateIMUTest()
 {
     if(btnSelect_.click)
     {
+        if (!isTurningStart)
+            targetDegree -= .1f;
+
         redraw_=true;
     }
 
     if (btnUp_.click)
     {
+        if (!isTurningStart)
+            targetDegree += .1f;
+
         redraw_=true;
     }
 
     if (btnSelect_.longPress)
     {
+        turnDelay = millis();
+        isTurning = true;
+        drive_.enable();
+
         redraw_ = true;
     }
 
@@ -304,9 +354,21 @@ void Menu::updateIMUTest()
         drive_.stop();
         drive_.disable();
 
+        isTurning = false;
+        isTurningStart = false;
+
         state_ = State::MAIN;
         redraw_ = true;
         return;
+    }
+
+    if (isTurningStart)
+    {
+        rotateIMU(targetDegree, imu_, drive_);
+    }
+    else if (isTurning && millis() - turnDelay > 2000)
+    {
+        isTurningStart = true;
     }
 
     if(redraw_)

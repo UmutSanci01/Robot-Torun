@@ -71,10 +71,19 @@ void setup()
     leftEncoder.setWheelDiameter(0.044f);
     rightEncoder.setWheelDiameter(0.044f);
 
-    drive.begin();
-    imu.begin();
+    if (!imu.begin())
+    {
+        for(;;);
+    }
 
+    if (!imu.calibrate())
+    {
+        for(;;);
+    }
+    
+    drive.begin();
     drive.setTargetRPM(0, 0);
+    drive.setPIDTunings(4, 12, 0.005f);
 
     menu.begin();
 }
