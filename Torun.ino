@@ -69,7 +69,7 @@ void setup()
 
     drive.begin();
 
-    drive.setTargetRPM(75, 75);
+    drive.setTargetRPM(0, 0);
 
     menu.begin();
 }

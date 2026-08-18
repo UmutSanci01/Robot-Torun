@@ -21,12 +21,14 @@ public:
 
     void update();
 
-    void updateMotorTest();
+    void updateRobotConfig();
 
-    void drawMotorTest();
+    void drawRobotConfig();
 
-    void drawMotorPower();
-    void updateEncoderSpeedTest();
+    // void drawMotorPower();
+
+    void updateIMUTest();
+    void drawIMUTest();
     
     void drawEncoderTest();
     void updateEncoderTest();
@@ -34,19 +36,17 @@ public:
     void drawPIDCalibration();
     void updatePIDCalibration();
 
-void drawEncoderSpeedTest();
-
 private:
 
   enum class State
   {
       MAIN,
-      MOTOR_TEST,
+      ROBOT_CONFIG,
       MOTOR_ENABLE,
       MOTOR_PWM,
       ENCODER_TEST,
       PID_CALIBRATION,
-      ENCODER_SPEED_TEST
+      IMU_TEST
   };
 
     State state_;
@@ -62,7 +62,7 @@ private:
     bool redraw_;
 
     uint32_t lastRefreshMs_;
-    static constexpr uint16_t REFRESH_INTERVAL_MS = 300;
+    static constexpr uint16_t REFRESH_INTERVAL_MS = 350;
 
     int pidTargetRPM_ = 0;
 

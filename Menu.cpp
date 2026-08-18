@@ -44,8 +44,8 @@ void Menu::update()
             updateMainMenu();
             break;
 
-        case State::MOTOR_TEST:
-            updateMotorTest();
+        case State::ROBOT_CONFIG:
+            updateRobotConfig();
             break;
         case State::ENCODER_TEST:
             state_ = State::ENCODER_TEST;
@@ -57,8 +57,8 @@ void Menu::update()
             updatePIDCalibration();
             return;
             break;
-        case State::ENCODER_SPEED_TEST:
-            updateEncoderSpeedTest();
+        case State::IMU_TEST:
+            updateIMUTest();
             break;
         default:
             break;
@@ -82,7 +82,7 @@ void Menu::updateMainMenu()
         switch(cursor_)
         {
             case 0:
-                state_ = State::MOTOR_TEST;
+                state_ = State::ROBOT_CONFIG;
 
                 // drive_.setPIDTunings(2.0f, 0.0f, 0.0f);
                 // drive_.setTargetRPM(50, 50);
@@ -97,7 +97,7 @@ void Menu::updateMainMenu()
                 return;
                 break;
             case 2:
-                state_ = State::ENCODER_SPEED_TEST;
+                state_ = State::IMU_TEST;
                 drive_.enable();
                 return;
                 break;
@@ -127,9 +127,9 @@ void Menu::drawMainMenu()
 
     const char* items[] =
     {
-        "Motor Test",
+        "Robot Config",
         "Encoder Test",
-        "Speed Test",
+        "IMU Test",
         "PID Calibration"
     };
 
@@ -149,12 +149,12 @@ void Menu::drawMainMenu()
 }
 
 float rightRPM = 0.f, leftRPM = 0.f;
-void Menu::drawMotorTest()
+void Menu::drawRobotConfig()
 {
     display_.clearDisplay();
 
     display_.setCursor(0,0);
-    display_.println("Motor Test");
+    display_.println("Robot Configure");
 
     display_.println();
 
@@ -199,7 +199,7 @@ void Menu::drawMotorTest()
     display_.display();
 }
 
-void Menu::updateMotorTest()
+void Menu::updateRobotConfig()
 {
     if(btnSelect_.click)
     {
@@ -264,137 +264,36 @@ void Menu::updateMotorTest()
 
     if(redraw_)
     {
-        drawMotorTest();
+        drawRobotConfig();
         redraw_ = false;
     }
 }
 
-int targetRPMR = 0;
-int targetRPML = 0;
-int targetRPMCount = 0;
-void Menu::drawEncoderSpeedTest()
+
+void Menu::drawIMUTest()
 {
     display_.clearDisplay();
 
     display_.setCursor(0,0);
-    display_.println("Speed Test");
-
-    display_.println();
-
-    display_.println("Target RPM");
-    if (targetRPMCount == 0)
-        display_.print("> ");
-    display_.print("R ");
-    display_.println(targetRPMR);
-    if (targetRPMCount == 1)
-        display_.print("> ");
-    display_.print("L ");
-    display_.println(targetRPML);
-    // display_.print("L ");
-    // display_.print(drive_.leftEncoder().rpm(),1);
-    // display_.println(" rpm");
-
-    // display_.print("R ");
-    // display_.print(drive_.rightEncoder().rpm(),1);
-    // display_.println(" rpm");
-
-    // display_.print("L ");
-    // display_.print(drive_.leftEncoder().velocity(),2);
-    // display_.println(" m/s");
-
-    // display_.print("R ");
-    // display_.print(drive_.rightEncoder().velocity(),2);
-    // display_.println(" m/s");
-
-    // display_.print("Target RPM ");
-    // // display_.print(drive_.power());
-    // display_.print(target_adjusted);
-    // display_.println();
+    display_.println("IMU Test");
 
     display_.display();
 }
 
-void Menu::updateEncoderSpeedTest()
+void Menu::updateIMUTest()
 {
     if(btnSelect_.click)
     {
-        if (targetRPMCount == 0)
-        {
-            targetRPMR++;
-        }
-        else if (targetRPMCount == 1)
-        {
-            targetRPML++;
-        }
-        // if(!drive_.enabled())
-        // {
-        //     drive_.enable();
-        // }
-
-        // int p = drive_.power();
-
-        // if(p<100)
-        //     p+=5;
-
-        // if (target_adjusted < 75)
-        //     target_adjusted += 5;
-
-        // drive_.setPower(p);
-
-        // drive_.setTargetRPM(
-        //     p,
-        //     p);
-        // drive_.setTargetRPM(
-        //     target_adjusted,
-        //     target_adjusted);
-
         redraw_=true;
     }
 
     if (btnUp_.click)
     {
-        if (targetRPMCount == 0)
-        {
-            if (targetRPMR > 0)
-                targetRPMR--;
-        }
-        else if (targetRPMCount == 1)
-        {
-            if (targetRPML > 0)
-                targetRPML--;
-        }
-
-        // if(!drive_.enabled())
-        // {
-        //     drive_.enable();
-        // }
-
-        // int p = drive_.power();
-
-        // if(p<100)
-        //     p+=5;
-
-        // if (target_adjusted > -75)
-        //     target_adjusted -= 5;
-
-        // drive_.setPower(p);
-
-        // drive_.setTargetRPM(
-        //     p,
-        //     p);
-        // drive_.setTargetRPM(
-        //     target_adjusted,
-        //     target_adjusted);
-
         redraw_=true;
     }
 
     if (btnSelect_.longPress)
     {
-        targetRPMCount++;
-        if (targetRPMCount > 1)
-            targetRPMCount = 0;
-
         redraw_ = true;
     }
 
@@ -410,7 +309,7 @@ void Menu::updateEncoderSpeedTest()
 
     if(redraw_)
     {
-        drawEncoderSpeedTest();
+        drawIMUTest();
         redraw_ = false;
     }
 }
