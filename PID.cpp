@@ -92,9 +92,10 @@ float PID::update(float input, float dt)
 
     float derivative = (error - previousError_) / dt;
 
-    float feedForward = (target_ / 75.0f) * 100.0f; 
+    // float feedForward = (target_ / 75.0f) * 100.0f; 
 
-    output_ = feedForward + (kp_ * error) + (ki_ * integral_) + (kd_ * derivative);
+    // output_ = feedForward + (kp_ * error) + (ki_ * integral_) + (kd_ * derivative);
+    output_ = (kp_ * error) + (ki_ * integral_) + (kd_ * derivative);
 
     output_ = constrain(output_, minOutput_, maxOutput_);
 
