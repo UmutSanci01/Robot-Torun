@@ -5,11 +5,11 @@
 #include "..\Encoder\Encoder.h"
 #include "MotorConfig.h"
 #include "../../PID.h"
+#include "../../lib/IMU/IMU.h"
 
 class Drive
 {
 public:
-
     Drive(
         Motor& leftMotor,
         Motor& rightMotor,
@@ -24,6 +24,8 @@ public:
     void disable();
 
     bool enabled() const;
+    bool turning() const;
+    bool driving() const;
 
     void stop();
 
@@ -72,8 +74,17 @@ public:
     float leftPIDOutput() const;
     float rightPIDOutput() const;
 
-private:
+    float leftTargetRPM() const;
+    float rightTargetRPM() const;
 
+    float Kp_Degree = 0.8f;
+
+    void rotateIMU(float _targetDegree, IMU& imu);
+    void driveStraightIMU(float baseRPM, float targetDegree, IMU& imu);
+
+    bool driveDistanceIMU(float targetDistanceCM, float baseRPM, float targetDegree, IMU& imu);
+
+private:
     Motor& leftMotor_;
     Motor& rightMotor_;
 
@@ -88,4 +99,7 @@ private:
 
     uint32_t previousPidMs_;
     int8_t power_;
+
+    bool isTurning_ = false;
+    bool isDriving_ = false;
 };

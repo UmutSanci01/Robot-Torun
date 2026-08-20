@@ -50,12 +50,10 @@ void Menu::update()
             updateRobotConfig();
             break;
         case State::ENCODER_TEST:
-            state_ = State::ENCODER_TEST;
             updateEncoderTest();
             break;
 
         case State::PID_CALIBRATION:
-            drive_.enable();
             updatePIDCalibration();
             return;
             break;
@@ -81,15 +79,12 @@ void Menu::updateMainMenu()
 
     if(btnSelect_.click)
     {
+        drive_.disable();
+
         switch(cursor_)
         {
             case 0:
                 state_ = State::ROBOT_CONFIG;
-
-                // drive_.setPIDTunings(2.0f, 0.0f, 0.0f);
-                // drive_.setTargetRPM(50, 50);
-                drive_.enable();
-
                 redraw_ = true;
                 return;
                 break;
@@ -100,12 +95,10 @@ void Menu::updateMainMenu()
                 break;
             case 2:
                 state_ = State::IMU_TEST;
-                drive_.enable();
                 return;
                 break;
             case 3:
                 state_ = State::PID_CALIBRATION;
-                drive_.enable();
                 return;
                 break;
         }
@@ -271,34 +264,10 @@ void Menu::updateRobotConfig()
     }
 }
 
-float Kp_Degree = 1.0f;
-bool isTurning = false;
-bool isTurningStart = false;
-void rotateIMU(float _targetDegree, IMU& imu, Drive& drive) {
-    float currDegree = imu.orientation().yaw; //
-    float degreeErr = _targetDegree - currDegree;
-
-    while (degreeErr > 180.0f) degreeErr -= 360.0f;
-    while (degreeErr < -180.0f) degreeErr += 360.0f;
-
-    float targetRPM = degreeErr * Kp_Degree;
-
-    targetRPM = constrain(targetRPM, -75.0f, 75.0f);
-
-    if (abs(degreeErr) < .1f) {
-        // drive.setTargetRPM(0, 0);
-        drive.stop();
-        drive.disable();
-
-        isTurningStart = false;
-        isTurning = false;
-    } else {
-        drive.setTargetRPM(targetRPM, -targetRPM);
-    }
-}
-
 uint32_t turnDelay = .0f;
 float targetDegree = .0f;
+bool isTurning = false;
+bool isTurningStart = false;
 void Menu::drawIMUTest()
 {
     display_.clearDisplay();
@@ -306,7 +275,7 @@ void Menu::drawIMUTest()
     display_.setCursor(0,0);
     display_.println("IMU Test");
     
-    display_.printf("Kp: %.1f | Tg: %.1f\n", Kp_Degree, targetDegree);
+    display_.printf("Kp: %.1f | Tg: %.1f\n", drive_.Kp_Degree, targetDegree);
     
     display_.printf("Roll : %.1f\n", imu_.orientation().roll);
     display_.printf("Pitch: %.1f\n", imu_.orientation().pitch);
@@ -344,7 +313,7 @@ void Menu::updateIMUTest()
     {
         turnDelay = millis();
         isTurning = true;
-        drive_.enable();
+
 
         redraw_ = true;
     }
@@ -364,11 +333,19 @@ void Menu::updateIMUTest()
 
     if (isTurningStart)
     {
-        rotateIMU(targetDegree, imu_, drive_);
+        drive_.rotateIMU(targetDegree, imu_);
+
+        if(!drive_.turning())
+        {
+            isTurning = false;
+            isTurningStart = false;
+        }
     }
     else if (isTurning && millis() - turnDelay > 2000)
     {
         isTurningStart = true;
+        drive_.enable();
+        drive_.stop();
     }
 
     if(redraw_)
@@ -378,6 +355,10 @@ void Menu::updateIMUTest()
     }
 }
 
+float targetDistCM = .0f;
+uint32_t driveDelay = .0f;
+bool isDriveStart = false;
+bool isDrive = false;
 void Menu::drawEncoderTest()
 {
     display_.clearDisplay();
@@ -393,28 +374,38 @@ void Menu::drawEncoderTest()
     display_.print(drive_.rightEncoder().ticks());
     display_.println(" tick");
 
-    display_.print("Power ");
-    display_.print(drive_.power());
-    display_.println();
+    display_.printf("targetDistance: %.2f\n", targetDistCM);
+
+    if (isDrive)
+        display_.println("Driving...");
 
     display_.display();
 }
 
 void Menu::updateEncoderTest()
 {
-        if(btnSelect_.click)
+    if(btnSelect_.click)
     {
-        if(!drive_.enabled())
-        {
-            drive_.enable();
-        }
+        targetDistCM += 15.f;
 
-        int p = drive_.power();
+        redraw_=true;
+    }
+    if(btnSelect_.longPress)
+    {
+        isDrive = true;
+        isDriveStart = false;
+        driveDelay = millis();
 
-        if(p<100)
-            p+=5;
+        // Reset encoder ticks
+        drive_.leftEncoder().reset();
+        drive_.rightEncoder().reset();
 
-        drive_.setPower(p);
+        redraw_=true;
+    }
+    if (btnUp_.click)
+    {
+        if (targetDistCM > 0.f)
+            targetDistCM -= 15.f;
 
         redraw_=true;
     }
@@ -426,6 +417,22 @@ void Menu::updateEncoderTest()
         state_ = State::MAIN;
         redraw_ = true;
         return;
+    }
+
+    if (isDriveStart)
+    {
+        if (drive_.driveDistanceIMU(targetDistCM, 10, imu_.orientation().yaw, imu_))
+        {
+            isDrive = false;
+            isDriveStart = false;
+        }
+    }
+    else if (isDrive && millis() - driveDelay > 2000)
+    {
+        isDriveStart = true;
+
+        drive_.enable();
+        drive_.stop();
     }
 
     if(redraw_)
@@ -441,7 +448,7 @@ enum PIDValue
     ki,
     kd
 };
-float values[3] = {0.f, 0.0f, 0.f};
+float values[3] = {4.f, 12.f, 0.005f};
 int value_counter = 0;
 void Menu::drawPIDCalibration()
 {
@@ -575,6 +582,11 @@ void Menu::updatePIDCalibration()
 
     if (tuningsChanged) 
     {
+        if (!drive_.enabled())
+        {
+            drive_.enable();
+        }
+
         drive_.setPIDTunings(
             values[PIDValue::kp],
             values[PIDValue::ki],

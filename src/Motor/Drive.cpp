@@ -44,6 +44,15 @@ void Drive::setTargetRPM(
     rightPid_.setTarget(right);
 }
 
+float Drive::leftTargetRPM() const
+{
+    return leftTargetRPM_;
+}
+float Drive::rightTargetRPM() const
+{
+    return rightTargetRPM_;
+}
+
 void Drive::enable()
 {
     leftMotor_.enable();
@@ -81,6 +90,8 @@ void Drive::stop()
 
     leftPid_.reset();
     rightPid_.reset();
+
+    setTargetRPM(0, 0);
 }
 
 void Drive::setPower(
@@ -198,4 +209,69 @@ Encoder& Drive::leftEncoder()
 Encoder& Drive::rightEncoder()
 {
     return rightEncoder_;
+}
+
+bool Drive::turning() const
+{
+    return isTurning_;
+}
+bool Drive::driving() const
+{
+    return isDriving_;
+}
+
+void Drive::rotateIMU(float _targetDegree, IMU& imu) {
+    float currDegree = imu.orientation().yaw;
+    float degreeErr = _targetDegree - currDegree;
+
+    while (degreeErr > 180.0f) degreeErr -= 360.0f;
+    while (degreeErr < -180.0f) degreeErr += 360.0f;
+
+    float targetRPM = degreeErr * Kp_Degree;
+
+    targetRPM = constrain(targetRPM, -75.0f, 75.0f);
+
+    if (abs(degreeErr) < 0.1f) {
+        stop();
+        disable();
+
+        isTurning_ = false;
+    } else {
+        if (!isTurning_) isTurning_ = true;
+        setTargetRPM(targetRPM, -targetRPM);
+    }
+}
+
+void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
+    float currDegree = imu.orientation().yaw;
+    float degreeErr = targetDegree - currDegree;
+
+    while (degreeErr > 180.0f) degreeErr -= 360.0f;
+    while (degreeErr < -180.0f) degreeErr += 360.0f;
+
+    float Kp_Straight = 1.5f;
+    float correction = degreeErr * Kp_Straight;
+
+    setTargetRPM(baseRPM - correction, baseRPM + correction);
+}
+
+bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, float targetDegree, IMU& imu) {
+    long leftTicks = abs(leftEncoder_.ticks()); 
+    long rightTicks = abs(rightEncoder_.ticks());
+
+    float averageTicks = (leftTicks + rightTicks) / 2.0f;
+
+    float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
+
+    if (currentDistanceCM >= targetDistanceCM) {
+        stop();
+        disable();
+
+        isDriving_ = false;
+        return true;
+    } 
+    
+    if (!isDriving_) isDriving_ = true;
+    driveStraightIMU(baseRPM, targetDegree, imu);
+    return false;
 }

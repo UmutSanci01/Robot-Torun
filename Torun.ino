@@ -82,7 +82,8 @@ void setup()
     }
     
     drive.begin();
-    drive.setTargetRPM(0, 0);
+    drive.disable();
+    drive.stop();
     drive.setPIDTunings(4, 12, 0.005f);
 
     menu.begin();
