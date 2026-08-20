@@ -296,7 +296,7 @@ void Menu::updateIMUTest()
     if(btnSelect_.click)
     {
         if (!isTurningStart)
-            targetDegree -= .1f;
+            targetDegree -= 15.1f;
 
         redraw_=true;
     }
@@ -304,7 +304,7 @@ void Menu::updateIMUTest()
     if (btnUp_.click)
     {
         if (!isTurningStart)
-            targetDegree += .1f;
+            targetDegree += 15.1f;
 
         redraw_=true;
     }
@@ -396,6 +396,9 @@ void Menu::updateEncoderTest()
         isDriveStart = false;
         driveDelay = millis();
 
+        // This variable is also used in the IMU Test
+        targetDegree = imu_.orientation().yaw;
+
         // Reset encoder ticks
         drive_.leftEncoder().reset();
         drive_.rightEncoder().reset();
@@ -421,7 +424,7 @@ void Menu::updateEncoderTest()
 
     if (isDriveStart)
     {
-        if (drive_.driveDistanceIMU(targetDistCM, 10, imu_))
+        if (drive_.driveDistanceIMU(targetDistCM, targetDegree, 20, imu_))
         {
             isDrive = false;
             isDriveStart = false;
@@ -430,8 +433,6 @@ void Menu::updateEncoderTest()
     else if (isDrive && millis() - driveDelay > 2000)
     {
         isDriveStart = true;
-
-        drive_.setTargetDegree(imu_.orientation().yaw);
 
         drive_.enable();
         drive_.stop();

@@ -60,12 +60,6 @@ public:
 
     Encoder& rightEncoder();
 
-    void setTargetDegree(
-        float degree
-    );
-
-    float targetDegree() const;
-
     void setTargetRPM(
     float left,
     float right);
@@ -86,9 +80,9 @@ public:
     float Kp_Degree = 0.8f;
 
     void rotateIMU(float _targetDegree, IMU& imu);
-    void driveStraightIMU(float baseRPM, IMU& imu);
 
-    bool driveDistanceIMU(float targetDistanceCM, float baseRPM, IMU& imu);
+    void driveStraightIMU(float baseRPM, float targetDegree, IMU& imu);
+    bool driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu);
 
 private:
     Motor& leftMotor_;
@@ -105,8 +99,6 @@ private:
 
     uint32_t previousPidMs_;
     int8_t power_;
-
-    float targetDegree_;
 
     bool isTurning_ = false;
     bool isDriving_ = false;

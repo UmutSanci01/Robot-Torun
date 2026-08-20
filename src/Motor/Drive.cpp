@@ -242,9 +242,9 @@ void Drive::rotateIMU(float _targetDegree, IMU& imu) {
     }
 }
 
-void Drive::driveStraightIMU(float baseRPM, IMU& imu) {
+void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     float currDegree = imu.orientation().yaw;
-    float degreeErr = targetDegree_ - currDegree;
+    float degreeErr = targetDegree - currDegree;
 
     while (degreeErr > 180.0f) degreeErr -= 360.0f;
     while (degreeErr < -180.0f) degreeErr += 360.0f;
@@ -255,7 +255,7 @@ void Drive::driveStraightIMU(float baseRPM, IMU& imu) {
     setTargetRPM(baseRPM + correction, baseRPM - correction);
 }
 
-bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, IMU& imu) {
+bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu) {
     long leftTicks = abs(leftEncoder_.ticks()); 
     long rightTicks = abs(rightEncoder_.ticks());
 
@@ -273,16 +273,6 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, IMU& imu) {
     } 
     
     if (!isDriving_) isDriving_ = true;
-    driveStraightIMU(baseRPM, imu);
+    driveStraightIMU(baseRPM, targetDegree, imu);
     return false;
-}
-
-void Drive::setTargetDegree(float degree)
-{
-    targetDegree_ = degree;
-}
-
-float Drive::targetDegree() const
-{
-    return targetDegree_;
 }
