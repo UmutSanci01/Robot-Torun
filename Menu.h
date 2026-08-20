@@ -38,6 +38,9 @@ public:
     void drawPIDCalibration();
     void updatePIDCalibration();
 
+    void drawPatternTest();
+    void updatePatternTest();
+
 private:
 
   enum class State
@@ -48,7 +51,8 @@ private:
       MOTOR_PWM,
       ENCODER_TEST,
       PID_CALIBRATION,
-      IMU_TEST
+      IMU_TEST,
+      PATTERN_TEST
   };
 
     State state_;
@@ -61,6 +65,8 @@ private:
     IMU& imu_;
 
     uint8_t cursor_;
+    uint8_t page_;
+    uint8_t pageNum_ = 2;
 
     bool redraw_;
 

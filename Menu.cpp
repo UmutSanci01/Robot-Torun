@@ -60,6 +60,9 @@ void Menu::update()
         case State::IMU_TEST:
             updateIMUTest();
             break;
+        case State::PATTERN_TEST:
+            updatePatternTest();
+            break;
         default:
             break;
     }
@@ -76,33 +79,57 @@ void Menu::updateMainMenu()
 
         redraw_ = true;
     }
+    if(btnUp_.longPress)
+    {
+        page_++;
+        if(page_ == pageNum_)
+        {
+            page_ = 0;
+        }
+
+        redraw_ = true;
+    }
 
     if(btnSelect_.click)
     {
         drive_.disable();
 
-        switch(cursor_)
+        if (page_ == 0)
         {
-            case 0:
-                state_ = State::ROBOT_CONFIG;
-                redraw_ = true;
-                return;
-                break;
+            switch(cursor_)
+            {
+                case 0:
+                    state_ = State::ROBOT_CONFIG;
+                    redraw_ = true;
+                    return;
+                    break;
 
-            case 1:
-                state_ = State::ENCODER_TEST;
-                return;
-                break;
-            case 2:
-                state_ = State::IMU_TEST;
-                return;
-                break;
-            case 3:
-                state_ = State::PID_CALIBRATION;
-                return;
-                break;
+                case 1:
+                    state_ = State::ENCODER_TEST;
+                    return;
+                    break;
+                case 2:
+                    state_ = State::IMU_TEST;
+                    return;
+                    break;
+                case 3:
+                    state_ = State::PID_CALIBRATION;
+                    return;
+                    break;
+            }
         }
-
+        
+        if (page_ == 1)
+        {
+            switch(cursor_)
+            {
+                case 0:
+                    state_ = State::PATTERN_TEST;
+                    redraw_ = true;
+                    return;
+                    break; 
+            }
+        }
         redraw_ = true;
     }
 
@@ -113,20 +140,27 @@ void Menu::updateMainMenu()
     }
 }
 
+const char* items[][4] =
+{
+    {
+        "Robot Config",
+        "Encoder Test",
+        "IMU Test",
+        "PID Calibration"
+    },
+    {
+        "Pattern Test",
+        ".",
+        ".",
+        "."
+    }
+};
 void Menu::drawMainMenu()
 {
     display_.clearDisplay();
 
     display_.setTextSize(1);
     display_.setTextColor(SSD1306_WHITE);
-
-    const char* items[] =
-    {
-        "Robot Config",
-        "Encoder Test",
-        "IMU Test",
-        "PID Calibration"
-    };
 
     for(uint8_t i = 0; i < 4; i++)
     {
@@ -137,7 +171,7 @@ void Menu::drawMainMenu()
         else
             display_.print("  ");
 
-        display_.println(items[i]);
+        display_.println(items[page_][i]);
     }
 
     display_.display();
@@ -600,6 +634,159 @@ void Menu::updatePIDCalibration()
     if(redraw_)
     {
         drawPIDCalibration();
+        redraw_ = false;
+    }
+}
+
+
+enum Pattern
+{
+    Square,
+    Rectangle,
+    Triangle,
+    END
+};
+
+const char *pattern_text[] = {
+    "Square",
+    "Rectangle",
+    "Triangle"
+};
+
+uint32_t patternDelay = 0;
+bool isPattern = false;
+bool isPatternStart = false;
+int currPattern = Pattern::Square;
+
+uint8_t patternStep = 0; 
+uint8_t edgeCount = 0;   
+void Menu::drawPatternTest()
+{
+    display_.clearDisplay();
+    display_.setCursor(0, 0);
+    display_.println("Pattern Test");
+
+    display_.printf("Pattern: %s\n", pattern_text[currPattern]);
+
+    if (isPattern)
+        display_.println("Patterning...");
+
+    display_.display();
+}
+
+void Menu::updatePatternTest()
+{
+    if (btnUp_.click)
+    {
+        currPattern++;
+        if (currPattern == Pattern::END)
+            currPattern = Pattern::Square;
+
+        redraw_ = true;
+    }
+
+    if (btnSelect_.longPress)
+    {
+        patternDelay = millis();
+        isPattern = true;
+        isPatternStart = false;
+        
+        patternStep = 0;
+        edgeCount = 0;
+        targetDegree = imu_.orientation().yaw; 
+        redraw_ = true;
+    }
+
+    if (btnUp_.longPress)
+    {
+        drive_.stop();
+        drive_.disable();
+        
+        isPattern = false;
+        isPatternStart = false;
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    if (isPattern && !isPatternStart && (millis() - patternDelay > 2000))
+    {
+        isPatternStart = true;
+        drive_.stop();
+        drive_.enable();
+    }
+
+    if (isPatternStart)
+    {
+        float targetDistance = 0.0f;
+        float turnAngle = 0.0f;
+        uint8_t maxEdges = 0;
+        float baseRPM = 55.0f; // Sürüş hızı sabiti
+
+        if (currPattern == Pattern::Square) 
+        {
+            targetDistance = 30.0f;
+            turnAngle = 90.0f;
+            maxEdges = 4;
+        } 
+        else if (currPattern == Pattern::Rectangle) 
+        {
+            targetDistance = (edgeCount % 2 == 0) ? 45.0f : 20.0f;
+            turnAngle = 90.0f;
+            maxEdges = 4;
+        } 
+        else if (currPattern == Pattern::Triangle) 
+        {
+            targetDistance = 30.0f;
+            turnAngle = 120.0f;
+            maxEdges = 3;
+        }
+
+        if (patternStep == 0) 
+        {
+            drive_.leftEncoder().reset(); 
+            drive_.rightEncoder().reset();
+            
+            drive_.enable();
+
+            patternStep = 1;
+        }
+        else if (patternStep == 1) 
+        {
+            if (drive_.driveDistanceIMU(targetDistance, targetDegree, baseRPM, imu_)) 
+            {
+                patternStep = 2; 
+            }
+        }
+        else if (patternStep == 2) 
+        {
+            drive_.enable();
+            targetDegree += turnAngle;
+            
+            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+            while (targetDegree < -180.0f) targetDegree += 360.0f;
+            
+            patternStep = 3;
+        }
+        else if (patternStep == 3) 
+        {
+            drive_.rotateIMU(targetDegree, imu_);
+            
+            if (!drive_.turning()) 
+            {
+                edgeCount++;
+                if (edgeCount >= maxEdges) 
+                {
+                    edgeCount = 0;
+                }
+                patternStep = 0;
+            }
+        }
+    }
+
+    if (redraw_)
+    {
+        drawPatternTest();
         redraw_ = false;
     }
 }
