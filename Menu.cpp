@@ -721,7 +721,7 @@ void Menu::updatePatternTest()
         float targetDistance = 0.0f;
         float turnAngle = 0.0f;
         uint8_t maxEdges = 0;
-        float baseRPM = 55.0f; // Sürüş hızı sabiti
+        float baseRPM = 30.0f; // Sürüş hızı sabiti
 
         if (currPattern == Pattern::Square) 
         {

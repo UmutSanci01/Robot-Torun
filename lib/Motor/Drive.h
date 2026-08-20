@@ -77,7 +77,7 @@ public:
     float leftTargetRPM() const;
     float rightTargetRPM() const;
 
-    float Kp_Degree = 0.8f;
+    float Kp_Degree = 1.0f;
 
     void rotateIMU(float _targetDegree, IMU& imu);
 

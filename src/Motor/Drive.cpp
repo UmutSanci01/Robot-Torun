@@ -90,8 +90,6 @@ void Drive::stop()
 
     leftPid_.reset();
     rightPid_.reset();
-
-    setTargetRPM(0, 0);
 }
 
 void Drive::setPower(
@@ -249,7 +247,7 @@ void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     while (degreeErr > 180.0f) degreeErr -= 360.0f;
     while (degreeErr < -180.0f) degreeErr += 360.0f;
 
-    float Kp_Straight = 1.5f;
+    float Kp_Straight = 1.0f;
     float correction = degreeErr * Kp_Straight;
 
     setTargetRPM(baseRPM + correction, baseRPM - correction);
@@ -270,9 +268,17 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
 
         isDriving_ = false;
         return true;
-    } 
+    }
+
+    float currentTargetRPM = baseRPM;
+    float rampDistance = 10.0f; // Soft acceleration distance(cm)
+    float minRPM = 5.0f;
+
+    if (currentDistanceCM < rampDistance) {
+        currentTargetRPM = minRPM + ((baseRPM - minRPM) * (currentDistanceCM / rampDistance));
+    }
     
     if (!isDriving_) isDriving_ = true;
-    driveStraightIMU(baseRPM, targetDegree, imu);
+    driveStraightIMU(currentTargetRPM, targetDegree, imu);
     return false;
 }
