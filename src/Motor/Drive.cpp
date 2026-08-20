@@ -231,7 +231,7 @@ void Drive::rotateIMU(float _targetDegree, IMU& imu) {
 
     targetRPM = constrain(targetRPM, -75.0f, 75.0f);
 
-    if (abs(degreeErr) < 0.1f) {
+    if (abs(degreeErr) < 0.100f) {
         stop();
         disable();
 
@@ -242,9 +242,9 @@ void Drive::rotateIMU(float _targetDegree, IMU& imu) {
     }
 }
 
-void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
+void Drive::driveStraightIMU(float baseRPM, IMU& imu) {
     float currDegree = imu.orientation().yaw;
-    float degreeErr = targetDegree - currDegree;
+    float degreeErr = targetDegree_ - currDegree;
 
     while (degreeErr > 180.0f) degreeErr -= 360.0f;
     while (degreeErr < -180.0f) degreeErr += 360.0f;
@@ -252,16 +252,17 @@ void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     float Kp_Straight = 1.5f;
     float correction = degreeErr * Kp_Straight;
 
-    setTargetRPM(baseRPM - correction, baseRPM + correction);
+    setTargetRPM(baseRPM + correction, baseRPM - correction);
 }
 
-bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, float targetDegree, IMU& imu) {
+bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, IMU& imu) {
     long leftTicks = abs(leftEncoder_.ticks()); 
     long rightTicks = abs(rightEncoder_.ticks());
 
     float averageTicks = (leftTicks + rightTicks) / 2.0f;
 
-    float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
+    // float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
+    float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
 
     if (currentDistanceCM >= targetDistanceCM) {
         stop();
@@ -272,6 +273,16 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float baseRPM, float target
     } 
     
     if (!isDriving_) isDriving_ = true;
-    driveStraightIMU(baseRPM, targetDegree, imu);
+    driveStraightIMU(baseRPM, imu);
     return false;
+}
+
+void Drive::setTargetDegree(float degree)
+{
+    targetDegree_ = degree;
+}
+
+float Drive::targetDegree() const
+{
+    return targetDegree_;
 }

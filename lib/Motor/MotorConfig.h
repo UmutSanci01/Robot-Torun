@@ -11,7 +11,6 @@ namespace MotorConfig
 
     constexpr uint8_t RIGHT_IN1_CHANNEL = 2;
     constexpr uint8_t RIGHT_IN2_CHANNEL = 3;
-
-    constexpr float ticksPerRev = 5925.0f; 
+    
     constexpr float wheelCircumferenceCM = 4.4f * PI; // 13.823 cm
 }

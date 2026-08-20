@@ -421,7 +421,7 @@ void Menu::updateEncoderTest()
 
     if (isDriveStart)
     {
-        if (drive_.driveDistanceIMU(targetDistCM, 10, imu_.orientation().yaw, imu_))
+        if (drive_.driveDistanceIMU(targetDistCM, 10, imu_))
         {
             isDrive = false;
             isDriveStart = false;
@@ -430,6 +430,8 @@ void Menu::updateEncoderTest()
     else if (isDrive && millis() - driveDelay > 2000)
     {
         isDriveStart = true;
+
+        drive_.setTargetDegree(imu_.orientation().yaw);
 
         drive_.enable();
         drive_.stop();
