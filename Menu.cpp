@@ -525,7 +525,6 @@ void Menu::drawPIDCalibration()
     // display_.println(drive_.power());
 
     display_.display();
-    redraw_ = true;
 }
 
 void Menu::updatePIDCalibration()
@@ -546,16 +545,6 @@ void Menu::updatePIDCalibration()
             case 2:
                 values[PIDValue::kd] += 0.001f;
                 break;
-            // case 3:
-            // {
-            //     int p = drive_.power();
-
-            //     if (p > -100)
-            //         p -= 1;
-
-            //     drive_.setPower(p);
-            //     break;
-            // }
             default:
                 break;
         }
@@ -580,17 +569,6 @@ void Menu::updatePIDCalibration()
                 if (values[PIDValue::kd] > 0)
                     values[PIDValue::kd] -= 0.001f;
                 break;
-            // case 3:
-            // {
-            //     int p = drive_.power();
-
-            //     if (p < 100)
-            //         p += 1;
-
-            //     drive_.setPower(p);
-            //     redraw_ = true;
-            //     break;
-            // }
             default:
                 break;
         }
