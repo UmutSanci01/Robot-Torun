@@ -90,6 +90,8 @@ void Drive::stop()
 
     leftPid_.reset();
     rightPid_.reset();
+
+    setTargetRPM(0, 0);
 }
 
 void Drive::setPower(
@@ -218,7 +220,7 @@ bool Drive::driving() const
     return isDriving_;
 }
 
-void Drive::rotateIMU(float _targetDegree, IMU& imu) {
+bool Drive::rotateIMU(float _targetDegree, IMU& imu) {
     float currDegree = imu.orientation().yaw;
     float degreeErr = _targetDegree - currDegree;
 
@@ -231,13 +233,16 @@ void Drive::rotateIMU(float _targetDegree, IMU& imu) {
 
     if (abs(degreeErr) < 0.100f) {
         stop();
-        disable();
+        // disable();
 
         isTurning_ = false;
-    } else {
-        if (!isTurning_) isTurning_ = true;
-        setTargetRPM(targetRPM, -targetRPM);
+        return true;
     }
+
+    if (!isTurning_) isTurning_ = true;
+    setTargetRPM(targetRPM, -targetRPM);
+
+    return false;
 }
 
 void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
@@ -247,7 +252,7 @@ void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     while (degreeErr > 180.0f) degreeErr -= 360.0f;
     while (degreeErr < -180.0f) degreeErr += 360.0f;
 
-    float Kp_Straight = 1.0f;
+    float Kp_Straight = 1.9f;
     float correction = degreeErr * Kp_Straight;
 
     setTargetRPM(baseRPM + correction, baseRPM - correction);
@@ -262,7 +267,7 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
 
     if (currentDistanceCM >= targetDistanceCM) {
         stop();
-        disable();
+        // disable();
         isDriving_ = false;
         return true;
     }
@@ -296,39 +301,3 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
     driveStraightIMU(currentProfileRPM, targetDegree, imu);
     return false;
 }
-
-// bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu) {
-//     long leftTicks = abs(leftEncoder_.ticks()); 
-//     long rightTicks = abs(rightEncoder_.ticks());
-
-//     float averageTicks = (leftTicks + rightTicks) / 2.0f;
-
-//     // float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
-//     float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
-
-//     if (currentDistanceCM >= targetDistanceCM) {
-//         stop();
-//         disable();
-
-//         isDriving_ = false;
-//         return true;
-//     }
-
-//     float currentTargetRPM = baseRPM;
-//     float rampUpDistance = 10.0f; // Soft acceleration distance(cm)
-//     float rampDownDistance = 15.0f; // Soft stop distance(cm)
-//     float minRPM = 5.0f;
-
-//     float remainingDistance = targetDistanceCM - currentDistanceCM;
-
-//     if (currentDistanceCM < rampUpDistance) {
-//         currentTargetRPM = minRPM + ((baseRPM - minRPM) * (currentDistanceCM / rampUpDistance));
-//     }
-//     else if (remainingDistance < rampDownDistance) {
-//         currentTargetRPM = minRPM + ((baseRPM - minRPM) * (remainingDistance / rampDownDistance));
-//     }
-
-//     if (!isDriving_) isDriving_ = true;
-//     driveStraightIMU(currentTargetRPM, targetDegree, imu);
-//     return false;
-// }

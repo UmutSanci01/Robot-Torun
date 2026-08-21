@@ -77,9 +77,9 @@ public:
     float leftTargetRPM() const;
     float rightTargetRPM() const;
 
-    float Kp_Degree = 1.0f;
+    float Kp_Degree = 0.8f;
 
-    void rotateIMU(float _targetDegree, IMU& imu);
+    bool rotateIMU(float _targetDegree, IMU& imu);
 
     void driveStraightIMU(float baseRPM, float targetDegree, IMU& imu);
     bool driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu);

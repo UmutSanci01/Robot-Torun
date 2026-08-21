@@ -189,11 +189,25 @@ int32_t Encoder::ticks() const
     return count_;
 }
 
+// void Encoder::reset()
+// {
+//     noInterrupts();
+//     count_ = 0;
+//     interrupts();
+// }
+
 void Encoder::reset()
 {
     noInterrupts();
     count_ = 0;
     interrupts();
+
+    position_ = 0;
+    previousPosition_ = 0;
+    delta_ = 0;
+    rpm_ = 0.0f;
+    velocity_ = 0.0f;
+    distance_ = 0.0f;
 }
 
 float Encoder::revolutions() const
