@@ -1,6 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #include "lib\Motor\Motor.h"
 #include "Button.h"
@@ -10,6 +12,9 @@
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+
+
+SemaphoreHandle_t i2cMutex;
 
 Adafruit_SSD1306 display(
     SCREEN_WIDTH,
@@ -43,18 +48,43 @@ Menu menu(
     imu
 );
 
+
+
+TaskHandle_t ControlTaskHandle;
+
+void ControlTask(void *pvParameters) {
+    for(;;) {
+        leftEncoder.update();
+        rightEncoder.update();
+
+        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+            imu.update();
+            xSemaphoreGive(i2cMutex); // İŞİN BİTİNCE KİLİDİ BIRAK
+        }
+
+        drive.update();
+
+        vTaskDelay(pdMS_TO_TICKS(5)); 
+    }
+}
+
+
+
 void setup()
 {
     Serial.begin(115200);
 
     Wire.begin();
     Wire.setClock(400000);
+
+    i2cMutex = xSemaphoreCreateMutex();
+
     display.begin(
         SSD1306_SWITCHCAPVCC,
         0x3C);
 
-    display.clearDisplay();
-    display.display();
+    // display.clearDisplay();
+    // display.display();
 
     btnUp.begin();
     btnSelect.begin();
@@ -86,6 +116,16 @@ void setup()
     drive.stop();
     drive.setPIDTunings(4, 12, 0.005f);
 
+    xTaskCreatePinnedToCore(
+        ControlTask,
+        "ControlTask", 
+        4096,
+        NULL,
+        2,
+        &ControlTaskHandle,
+        0
+    );
+
     menu.begin();
 }
 
@@ -94,11 +134,16 @@ void loop()
     btnUp.update();
     btnSelect.update();
 
-    leftEncoder.update();
-    rightEncoder.update();
+    // leftEncoder.update();
+    // rightEncoder.update();
 
-    imu.update();
-    drive.update();
+    // imu.update();
+    // drive.update();
 
-    menu.update();
+    if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+        menu.update();
+        xSemaphoreGive(i2cMutex); // KİLİDİ BIRAK
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(10));
 }
