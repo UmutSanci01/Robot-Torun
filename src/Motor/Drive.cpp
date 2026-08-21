@@ -36,12 +36,16 @@ bool Drive::begin()
 void Drive::setTargetRPM(
     float left,
     float right)
-{
-    leftTargetRPM_ = left;
-    rightTargetRPM_ = right;
+// {
+//     leftTargetRPM_ = left;
+//     rightTargetRPM_ = right;
 
-    leftPid_.setTarget(left);
-    rightPid_.setTarget(right);
+//     leftPid_.setTarget(left);
+//     rightPid_.setTarget(right);
+// }
+{
+    leftDesiredRPM_ = left;
+    rightDesiredRPM_ = right;
 }
 
 float Drive::leftTargetRPM() const
@@ -91,7 +95,13 @@ void Drive::stop()
     leftPid_.reset();
     rightPid_.reset();
 
-    setTargetRPM(0, 0);
+    leftDesiredRPM_ = 0.0f;
+    rightDesiredRPM_ = 0.0f;
+    leftTargetRPM_ = 0.0f;
+    rightTargetRPM_ = 0.0f;
+    
+    leftPid_.setTarget(0.0f);
+    rightPid_.setTarget(0.0f);
 }
 
 void Drive::setPower(
@@ -128,10 +138,31 @@ void Drive::update()
         (now - previousPidMs_) /
         1000.0f;
 
-    if(dt < 0.02f)
+    if(dt < 0.04f)
         return;
 
     previousPidMs_ = now;
+
+    // SLEW RATE LIMITER
+    if (leftTargetRPM_ < leftDesiredRPM_) {
+        leftTargetRPM_ += accelStep_;
+        if (leftTargetRPM_ > leftDesiredRPM_) leftTargetRPM_ = leftDesiredRPM_;
+    } else if (leftTargetRPM_ > leftDesiredRPM_) {
+        leftTargetRPM_ -= accelStep_;
+        if (leftTargetRPM_ < leftDesiredRPM_) leftTargetRPM_ = leftDesiredRPM_;
+    }
+
+    if (rightTargetRPM_ < rightDesiredRPM_) {
+        rightTargetRPM_ += accelStep_;
+        if (rightTargetRPM_ > rightDesiredRPM_) rightTargetRPM_ = rightDesiredRPM_;
+    } else if (rightTargetRPM_ > rightDesiredRPM_) {
+        rightTargetRPM_ -= accelStep_;
+        if (rightTargetRPM_ < rightDesiredRPM_) rightTargetRPM_ = rightDesiredRPM_;
+    }
+
+    leftPid_.setTarget(leftTargetRPM_);
+    rightPid_.setTarget(rightTargetRPM_);
+    //
 
     float left =
         leftPid_.update(
@@ -272,32 +303,35 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
         return true;
     }
 
-    static float currentProfileRPM = 5.0f; 
+    // static float currentProfileRPM = 5.0f; 
     float minRPM = 5.0f; 
     float remainingDistance = targetDistanceCM - currentDistanceCM;
 
     if (!isDriving_) {
-        currentProfileRPM = minRPM;
+        // currentProfileRPM = minRPM;
         isDriving_ = true;
     }
 
     float Kp_Distance = 3.5f; 
-    float maxAllowedRPM = remainingDistance * Kp_Distance;
+    // float maxAllowedRPM = remainingDistance * Kp_Distance;
+    float targetRPM = remainingDistance * Kp_Distance;
 
-    maxAllowedRPM = constrain(maxAllowedRPM, minRPM, baseRPM);
+    // maxAllowedRPM = constrain(maxAllowedRPM, minRPM, baseRPM);
+    targetRPM = constrain(targetRPM, minRPM, baseRPM);
 
-    float accelerationStep = 0.5f;
+    // float accelerationStep = 0.5f;
 
-    if (currentProfileRPM < maxAllowedRPM) {
-        currentProfileRPM += accelerationStep; // Kademeli hızlan
-        if (currentProfileRPM > maxAllowedRPM) {
-            currentProfileRPM = maxAllowedRPM;
-        }
-    } else {
-        currentProfileRPM = maxAllowedRPM; 
-    }
-    // ------------------------------------
+    // if (currentProfileRPM < maxAllowedRPM) {
+    //     currentProfileRPM += accelerationStep; // Kademeli hızlan
+    //     if (currentProfileRPM > maxAllowedRPM) {
+    //         currentProfileRPM = maxAllowedRPM;
+    //     }
+    // } else {
+    //     currentProfileRPM = maxAllowedRPM; 
+    // }
+    // // ------------------------------------
 
-    driveStraightIMU(currentProfileRPM, targetDegree, imu);
+    // driveStraightIMU(currentProfileRPM, targetDegree, imu);
+    driveStraightIMU(targetRPM, targetDegree, imu);
     return false;
 }

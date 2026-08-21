@@ -97,6 +97,11 @@ private:
     float leftTargetRPM_;
     float rightTargetRPM_;
 
+    float leftDesiredRPM_ = 0.0f;
+    float rightDesiredRPM_ = 0.0f;
+
+    float accelStep_ = 1.5f;
+
     uint32_t previousPidMs_;
     int8_t power_;
 
