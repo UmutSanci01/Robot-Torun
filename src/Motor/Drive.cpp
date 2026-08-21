@@ -258,27 +258,77 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
     long rightTicks = abs(rightEncoder_.ticks());
 
     float averageTicks = (leftTicks + rightTicks) / 2.0f;
-
-    // float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
     float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
 
     if (currentDistanceCM >= targetDistanceCM) {
         stop();
         disable();
-
         isDriving_ = false;
         return true;
     }
 
-    float currentTargetRPM = baseRPM;
-    float rampDistance = 10.0f; // Soft acceleration distance(cm)
-    float minRPM = 5.0f;
+    static float currentProfileRPM = 15.0f; 
+    float minRPM = 15.0f; 
+    float remainingDistance = targetDistanceCM - currentDistanceCM;
 
-    if (currentDistanceCM < rampDistance) {
-        currentTargetRPM = minRPM + ((baseRPM - minRPM) * (currentDistanceCM / rampDistance));
+    if (!isDriving_) {
+        currentProfileRPM = minRPM;
+        isDriving_ = true;
     }
-    
-    if (!isDriving_) isDriving_ = true;
-    driveStraightIMU(currentTargetRPM, targetDegree, imu);
+
+    float Kp_Distance = 3.5f; 
+    float maxAllowedRPM = remainingDistance * Kp_Distance;
+
+    maxAllowedRPM = constrain(maxAllowedRPM, minRPM, baseRPM);
+
+    float accelerationStep = 0.5f;
+
+    if (currentProfileRPM < maxAllowedRPM) {
+        currentProfileRPM += accelerationStep; // Kademeli hızlan
+        if (currentProfileRPM > maxAllowedRPM) {
+            currentProfileRPM = maxAllowedRPM;
+        }
+    } else {
+        currentProfileRPM = maxAllowedRPM; 
+    }
+    // ------------------------------------
+
+    driveStraightIMU(currentProfileRPM, targetDegree, imu);
     return false;
 }
+
+// bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu) {
+//     long leftTicks = abs(leftEncoder_.ticks()); 
+//     long rightTicks = abs(rightEncoder_.ticks());
+
+//     float averageTicks = (leftTicks + rightTicks) / 2.0f;
+
+//     // float currentDistanceCM = (averageTicks / MotorConfig::ticksPerRev) * MotorConfig::wheelCircumferenceCM;
+//     float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
+
+//     if (currentDistanceCM >= targetDistanceCM) {
+//         stop();
+//         disable();
+
+//         isDriving_ = false;
+//         return true;
+//     }
+
+//     float currentTargetRPM = baseRPM;
+//     float rampUpDistance = 10.0f; // Soft acceleration distance(cm)
+//     float rampDownDistance = 15.0f; // Soft stop distance(cm)
+//     float minRPM = 5.0f;
+
+//     float remainingDistance = targetDistanceCM - currentDistanceCM;
+
+//     if (currentDistanceCM < rampUpDistance) {
+//         currentTargetRPM = minRPM + ((baseRPM - minRPM) * (currentDistanceCM / rampUpDistance));
+//     }
+//     else if (remainingDistance < rampDownDistance) {
+//         currentTargetRPM = minRPM + ((baseRPM - minRPM) * (remainingDistance / rampDownDistance));
+//     }
+
+//     if (!isDriving_) isDriving_ = true;
+//     driveStraightIMU(currentTargetRPM, targetDegree, imu);
+//     return false;
+// }
