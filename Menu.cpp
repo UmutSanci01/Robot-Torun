@@ -643,35 +643,29 @@ void Menu::updatePatternTest()
 
     if (isPatternStart)
     {
-        // Gidiş ve dönüş fazını ayırmak için basit bir bayrak
         static bool turnPhase = false; 
 
         if (currPattern == Pattern::Square)
         {
             switch (patternStep)
             {
-                // Karenin 4 kenarı da aynı işlemi yaptığı için kod tekrarına gerek yok
                 case 0:
                 case 1:
                 case 2:
                 case 3:
                     if (!turnPhase) 
                     {
-                        // --- 1. AŞAMA: SADECE DÜZ GİT ---
                         if (drive_.driveDistanceIMU(50.0f, targetDegree, 55.0f, imu_)) 
                         {
-                            turnPhase = true; // Gidiş bitti, dönüş fazına geç
+                            turnPhase = true;
                         }
                     } 
                     else 
                     {
-                        // --- 2. AŞAMA: SADECE DÖN ---
-                        // (rotateIMU'nun void döndürdüğünü varsayıyorum)
                         drive_.rotateIMU(targetDegree + 90.0f, imu_); 
                         
                         if (!drive_.turning()) 
                         {
-                            // Dönüş tamamen bittiğinde her şeyi sıfırla ve sonraki adıma geç
                             patternStep++;
                             if (patternStep > 3) patternStep = 0; // Başa sar
                             
@@ -681,7 +675,67 @@ void Menu::updatePatternTest()
                             
                             drive_.leftEncoder().reset();
                             drive_.rightEncoder().reset();
-                            turnPhase = false; // Bir sonraki adım için tekrar düz gitmeye ayarla
+                            turnPhase = false;
+                        }
+                    }
+                    break;
+            }
+        }
+        else if (currPattern == Pattern::Rectangle)
+        {
+            switch (patternStep)
+            {
+                case 0: case 1: case 2: case 3:
+                    if (!turnPhase) 
+                    {
+                        float dist = (patternStep % 2 == 0) ? 50.0f : 25.0f;
+                        
+                        if (drive_.driveDistanceIMU(dist, targetDegree, 55.0f, imu_)) turnPhase = true;
+                    } 
+                    else 
+                    {
+                        drive_.rotateIMU(targetDegree + 90.0f, imu_); 
+                        if (!drive_.turning()) 
+                        {
+                            patternStep++;
+                            if (patternStep > 3) patternStep = 0;
+                            
+                            targetDegree += 90.0f;
+                            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                            while (targetDegree < -180.0f) targetDegree += 360.0f;
+                            
+                            drive_.leftEncoder().reset();
+                            drive_.rightEncoder().reset();
+                            turnPhase = false; 
+                        }
+                    }
+                    break;
+            }
+        }
+        else if (currPattern == Pattern::Triangle)
+        {
+            switch (patternStep)
+            {
+                case 0: case 1: case 2:
+                    if (!turnPhase) 
+                    {
+                        if (drive_.driveDistanceIMU(40.0f, targetDegree, 55.0f, imu_)) turnPhase = true;
+                    } 
+                    else 
+                    {
+                        drive_.rotateIMU(targetDegree + 120.0f, imu_); 
+                        if (!drive_.turning()) 
+                        {
+                            patternStep++;
+                            if (patternStep > 2) patternStep = 0;
+                            
+                            targetDegree += 120.0f;
+                            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                            while (targetDegree < -180.0f) targetDegree += 360.0f;
+                            
+                            drive_.leftEncoder().reset();
+                            drive_.rightEncoder().reset();
+                            turnPhase = false; 
                         }
                     }
                     break;
@@ -692,81 +746,6 @@ void Menu::updatePatternTest()
     {
         isPatternStart = true;
     }
-
-    // if (isPattern && !isPatternStart && (millis() - patternDelay > 2000))
-    // {
-    //     isPatternStart = true;
-    //     drive_.stop();
-    //     drive_.enable();
-    // }
-
-    // if (isPatternStart)
-    // {
-    //     float targetDistance = 0.0f;
-    //     float turnAngle = 0.0f;
-    //     uint8_t maxEdges = 0;
-    //     float baseRPM = 30.0f; // Sürüş hızı sabiti
-
-    //     if (currPattern == Pattern::Square) 
-    //     {
-    //         targetDistance = 30.0f;
-    //         turnAngle = 90.0f;
-    //         maxEdges = 4;
-    //     } 
-    //     else if (currPattern == Pattern::Rectangle) 
-    //     {
-    //         targetDistance = (edgeCount % 2 == 0) ? 45.0f : 20.0f;
-    //         turnAngle = 90.0f;
-    //         maxEdges = 4;
-    //     } 
-    //     else if (currPattern == Pattern::Triangle) 
-    //     {
-    //         targetDistance = 30.0f;
-    //         turnAngle = 120.0f;
-    //         maxEdges = 3;
-    //     }
-
-    //     if (patternStep == 0) 
-    //     {
-    //         drive_.leftEncoder().reset(); 
-    //         drive_.rightEncoder().reset();
-            
-    //         drive_.enable();
-
-    //         patternStep = 1;
-    //     }
-    //     else if (patternStep == 1) 
-    //     {
-    //         if (drive_.driveDistanceIMU(targetDistance, targetDegree, baseRPM, imu_)) 
-    //         {
-    //             patternStep = 2; 
-    //         }
-    //     }
-    //     else if (patternStep == 2) 
-    //     {
-    //         drive_.enable();
-    //         targetDegree += turnAngle;
-            
-    //         while (targetDegree > 180.0f) targetDegree -= 360.0f;
-    //         while (targetDegree < -180.0f) targetDegree += 360.0f;
-            
-    //         patternStep = 3;
-    //     }
-    //     else if (patternStep == 3) 
-    //     {
-    //         drive_.rotateIMU(targetDegree, imu_);
-            
-    //         if (!drive_.turning()) 
-    //         {
-    //             edgeCount++;
-    //             if (edgeCount >= maxEdges) 
-    //             {
-    //                 edgeCount = 0;
-    //             }
-    //             patternStep = 0;
-    //         }
-    //     }
-    // }
 
     if (redraw_)
     {

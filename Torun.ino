@@ -60,7 +60,7 @@ void ControlTask(void *pvParameters) {
 
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
             imu.update();
-            xSemaphoreGive(i2cMutex); // İŞİN BİTİNCE KİLİDİ BIRAK
+            xSemaphoreGive(i2cMutex);
         }
 
         drive.update();
@@ -83,9 +83,6 @@ void setup()
     display.begin(
         SSD1306_SWITCHCAPVCC,
         0x3C);
-
-    // display.clearDisplay();
-    // display.display();
 
     btnUp.begin();
     btnSelect.begin();
@@ -135,15 +132,9 @@ void loop()
     btnUp.update();
     btnSelect.update();
 
-    // leftEncoder.update();
-    // rightEncoder.update();
-
-    // imu.update();
-    // drive.update();
-
     if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
         menu.update();
-        xSemaphoreGive(i2cMutex); // KİLİDİ BIRAK
+        xSemaphoreGive(i2cMutex);
     }
 
     vTaskDelay(pdMS_TO_TICKS(10));
