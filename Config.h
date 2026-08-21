@@ -14,6 +14,8 @@ namespace Config
     constexpr uint32_t I2C_CLOCK = 400000UL;
 
     constexpr uint8_t MPU6500_ADDRESS = 0x68;
+
+    constexpr float kp = 2.f, ki = 12.f, kd = 0.005f;
 }
 
 /*----------------------------------------------------------

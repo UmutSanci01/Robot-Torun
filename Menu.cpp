@@ -408,7 +408,7 @@ void Menu::drawEncoderTest()
     display_.print(drive_.rightEncoder().ticks());
     display_.println(" tick");
 
-    display_.printf("targetDistance: %.2f\n", targetDistCM);
+    display_.printf("Distance(cm): %.0f\n", targetDistCM);
 
     if (isDrive)
         display_.println("Driving...");
@@ -458,7 +458,7 @@ void Menu::updateEncoderTest()
 
     if (isDriveStart)
     {
-        if (drive_.driveDistanceIMU(targetDistCM, targetDegree, 20, imu_))
+        if (drive_.driveDistanceIMU(targetDistCM, targetDegree, 85, imu_))
         {
             isDrive = false;
             isDriveStart = false;
@@ -485,7 +485,7 @@ enum PIDValue
     ki,
     kd
 };
-float values[3] = {4.f, 12.f, 0.005f};
+float values[3] = {Config::kp, Config::ki, Config::kd};
 int value_counter = 0;
 void Menu::drawPIDCalibration()
 {

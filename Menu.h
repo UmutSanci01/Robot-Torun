@@ -6,6 +6,7 @@
 #include "Button.h"
 #include "lib\Motor\Drive.h"
 #include "lib\IMU\IMU.h"
+#include "Config.h"
 
 class Menu
 {

@@ -9,6 +9,7 @@
 #include "Menu.h"
 #include "lib\Encoder\Encoder.h"
 #include "lib\IMU\IMU.h"
+#include "Config.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -114,7 +115,7 @@ void setup()
     drive.begin();
     drive.disable();
     drive.stop();
-    drive.setPIDTunings(4, 12, 0.005f);
+    drive.setPIDTunings(Config::kp, Config::ki, Config::kd);
 
     xTaskCreatePinnedToCore(
         ControlTask,
