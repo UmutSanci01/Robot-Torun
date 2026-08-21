@@ -267,8 +267,8 @@ bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float b
         return true;
     }
 
-    static float currentProfileRPM = 15.0f; 
-    float minRPM = 15.0f; 
+    static float currentProfileRPM = 5.0f; 
+    float minRPM = 5.0f; 
     float remainingDistance = targetDistanceCM - currentDistanceCM;
 
     if (!isDriving_) {
