@@ -227,7 +227,7 @@ void Drive::rotateIMU(float _targetDegree, IMU& imu) {
 
     float targetRPM = degreeErr * Kp_Degree;
 
-    targetRPM = constrain(targetRPM, -75.0f, 75.0f);
+    targetRPM = constrain(targetRPM, -40.0f, 40.0f);
 
     if (abs(degreeErr) < 0.100f) {
         stop();
