@@ -716,20 +716,65 @@ void Menu::updatePatternTest()
         {
             switch (patternStep)
             {
-                case 0: case 1: case 2:
+                case 0: // 1. Aşama: İlk Dik Kenar (47.5 cm) ve 90 Derece Dönüş
                     if (!turnPhase) 
                     {
-                        if (drive_.driveDistanceIMU(40.0f, targetDegree, 55.0f, imu_)) turnPhase = true;
+                        if (drive_.driveDistanceIMU(47.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
                     } 
                     else 
                     {
-                        drive_.rotateIMU(targetDegree + 120.0f, imu_); 
+                        drive_.rotateIMU(targetDegree + 90.0f, imu_); 
                         if (!drive_.turning()) 
                         {
-                            patternStep++;
-                            if (patternStep > 2) patternStep = 0;
+                            patternStep = 1;
                             
-                            targetDegree += 120.0f;
+                            targetDegree += 90.0f;
+                            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                            while (targetDegree < -180.0f) targetDegree += 360.0f;
+                            
+                            drive_.leftEncoder().reset();
+                            drive_.rightEncoder().reset();
+                            turnPhase = false; 
+                        }
+                    }
+                    break;
+
+                case 1: // 2. Aşama: İkinci Dik Kenar (47.5 cm) ve 135 Derece Dar Açı Dönüşü
+                    if (!turnPhase) 
+                    {
+                        if (drive_.driveDistanceIMU(47.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
+                    } 
+                    else 
+                    {
+                        drive_.rotateIMU(targetDegree + 135.0f, imu_); 
+                        if (!drive_.turning()) 
+                        {
+                            patternStep = 2;
+                            
+                            targetDegree += 135.0f;
+                            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                            while (targetDegree < -180.0f) targetDegree += 360.0f;
+                            
+                            drive_.leftEncoder().reset();
+                            drive_.rightEncoder().reset();
+                            turnPhase = false; 
+                        }
+                    }
+                    break;
+
+                case 2: // 3. Aşama: Hipotenüs (67.5 cm) ve 135 Derece Dar Açı Dönüşü
+                    if (!turnPhase) 
+                    {
+                        if (drive_.driveDistanceIMU(67.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
+                    } 
+                    else 
+                    {
+                        drive_.rotateIMU(targetDegree + 135.0f, imu_); 
+                        if (!drive_.turning()) 
+                        {
+                            patternStep = 0; // Şekil kapandı, sonsuz döngü için başa dön
+                            
+                            targetDegree += 135.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;
                             while (targetDegree < -180.0f) targetDegree += 360.0f;
                             
