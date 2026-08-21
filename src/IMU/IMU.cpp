@@ -71,9 +71,9 @@ bool IMU::update()
     gyro_.y = gyr.y - gyroBias_.y;
     gyro_.z = gyr.z - gyroBias_.z;
 
-    if (abs(gyro_.z) < 0.50f) gyro_.z = 0.0f;
-    if (abs(gyro_.x) < 0.50f) gyro_.x = 0.0f;
-    if (abs(gyro_.y) < 0.50f) gyro_.y = 0.0f;
+    gyro_.x = (gyro_.x > -0.50f && gyro_.x < 0.50f) ? 0.0f : gyro_.x;
+    gyro_.y = (gyro_.y > -0.50f && gyro_.y < 0.50f) ? 0.0f : gyro_.y;
+    gyro_.z = (gyro_.z > -0.50f && gyro_.z < 0.50f) ? 0.0f : gyro_.z;
 
     filter_.updateIMU(
         gyro_.x,
