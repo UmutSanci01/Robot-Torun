@@ -81,8 +81,8 @@ void setup()
     leftEncoder.setTicksPerRevolution(5925.0f);
     rightEncoder.setTicksPerRevolution(5925.0f);
 
-    leftEncoder.setWheelDiameter(0.044f);
-    rightEncoder.setWheelDiameter(0.044f);
+    leftEncoder.setWheelDiameter(0.04408f);
+    rightEncoder.setWheelDiameter(0.04408f);
 
     if (!imu.begin())
     {
@@ -95,8 +95,8 @@ void setup()
     }
     
     drive.begin();
-    drive.disable();
     drive.stop();
+    drive.enable();
     drive.setPIDTunings(Config::kp, Config::ki, Config::kd);
 
     xTaskCreatePinnedToCore(

@@ -93,7 +93,7 @@ void Menu::updateMainMenu()
 
     if(btnSelect_.click)
     {
-        drive_.disable();
+        // drive_.disable();
 
         if (page_ == 0)
         {
@@ -225,7 +225,7 @@ void Menu::updateRobotConfig()
     {
         drive_.stop();
 
-        drive_.disable();
+        // drive_.disable();
 
         state_=State::MAIN;
 
@@ -260,7 +260,7 @@ void Menu::drawIMUTest()
     
     display_.printf("Roll : %.1f\n", imu_.orientation().roll);
     display_.printf("Pitch: %.1f\n", imu_.orientation().pitch);
-    display_.printf("Yaw  : %.1f\n", imu_.orientation().yaw);
+    display_.printf("Yaw  : %.2f\n", imu_.orientation().yaw);
 
     display_.println();
 
@@ -302,7 +302,7 @@ void Menu::updateIMUTest()
     if(btnUp_.longPress)
     {
         drive_.stop();
-        drive_.disable();
+        // drive_.disable();
 
         isTurning = false;
         isTurningStart = false;
@@ -321,13 +321,13 @@ void Menu::updateIMUTest()
             isTurning = false;
             isTurningStart = false;
 
-            drive_.disable();
+            // drive_.disable();
         }
     }
     else if (isTurning && millis() - turnDelay > 2000)
     {
         isTurningStart = true;
-        drive_.enable();
+        // drive_.enable();
         drive_.stop();
     }
 
@@ -398,7 +398,7 @@ void Menu::updateEncoderTest()
     if(btnUp_.longPress)
     {
         drive_.stop();
-        drive_.disable();
+        // drive_.disable();
 
         state_ = State::MAIN;
         redraw_ = true;
@@ -417,7 +417,7 @@ void Menu::updateEncoderTest()
     {
         isDriveStart = true;
 
-        drive_.enable();
+        // drive_.enable();
         drive_.stop();
     }
 
@@ -537,7 +537,7 @@ void Menu::updatePIDCalibration()
     if (btnUp_.longPress)
     {
         drive_.stop();
-        drive_.disable();
+        // drive_.disable();
 
         state_ = State::MAIN;
         redraw_ = true;
@@ -548,7 +548,7 @@ void Menu::updatePIDCalibration()
     {
         if (!drive_.enabled())
         {
-            drive_.enable();
+            // drive_.enable();
         }
 
         drive_.setPIDTunings(
@@ -627,13 +627,13 @@ void Menu::updatePatternTest()
         drive_.rightEncoder().reset();
 
         drive_.stop();
-        drive_.enable();
+        // drive_.enable();
     }
 
     if (btnUp_.longPress)
     {
         drive_.stop();
-        drive_.disable();
+        // drive_.disable();
         
         isPattern = false;
         isPatternStart = false;
