@@ -67,6 +67,9 @@ void Drive::disable()
 {
     leftMotor_.disable();
     rightMotor_.disable();
+
+    isDriving_ = false;
+    isTurning_ = false;
 }
 
 bool Drive::enabled() const
@@ -102,6 +105,9 @@ void Drive::stop()
     
     leftPid_.setTarget(0.0f);
     rightPid_.setTarget(0.0f);
+
+    isDriving_ = false;
+    isTurning_ = false;
 }
 
 void Drive::setPower(

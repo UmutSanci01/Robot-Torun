@@ -30,14 +30,15 @@ bool Menu::begin()
     return true;
 }
 
-void Menu::update()
+void Menu::update(bool draw)
 {
     uint32_t now = millis();
 
     if (now - lastRefreshMs_ >= REFRESH_INTERVAL_MS)
     {
         lastRefreshMs_ = now;
-        redraw_ = true;
+        if (draw)
+            redraw_ = true;
     }
 
     switch(state_)
@@ -636,6 +637,9 @@ void Menu::updatePatternTest()
         
         isPattern = false;
         isPatternStart = false;
+        patternStep = 0; 
+        edgeCount = 0;  
+
         state_ = State::MAIN;
         redraw_ = true;
         return;
@@ -667,7 +671,7 @@ void Menu::updatePatternTest()
                         if (!drive_.turning()) 
                         {
                             patternStep++;
-                            if (patternStep > 3) patternStep = 0; // Başa sar
+                            if (patternStep > 3) patternStep = 0;
                             
                             targetDegree += 90.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;
@@ -716,7 +720,7 @@ void Menu::updatePatternTest()
         {
             switch (patternStep)
             {
-                case 0: // 1. Aşama: İlk Dik Kenar (47.5 cm) ve 90 Derece Dönüş
+                case 0:
                     if (!turnPhase) 
                     {
                         if (drive_.driveDistanceIMU(47.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
@@ -739,7 +743,7 @@ void Menu::updatePatternTest()
                     }
                     break;
 
-                case 1: // 2. Aşama: İkinci Dik Kenar (47.5 cm) ve 135 Derece Dar Açı Dönüşü
+                case 1:
                     if (!turnPhase) 
                     {
                         if (drive_.driveDistanceIMU(47.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
@@ -762,7 +766,7 @@ void Menu::updatePatternTest()
                     }
                     break;
 
-                case 2: // 3. Aşama: Hipotenüs (67.5 cm) ve 135 Derece Dar Açı Dönüşü
+                case 2:
                     if (!turnPhase) 
                     {
                         if (drive_.driveDistanceIMU(67.5f, targetDegree, 55.0f, imu_)) turnPhase = true;
@@ -772,7 +776,7 @@ void Menu::updatePatternTest()
                         drive_.rotateIMU(targetDegree + 135.0f, imu_); 
                         if (!drive_.turning()) 
                         {
-                            patternStep = 0; // Şekil kapandı, sonsuz döngü için başa dön
+                            patternStep = 0;
                             
                             targetDegree += 135.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;

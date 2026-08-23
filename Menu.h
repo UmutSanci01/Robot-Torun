@@ -22,7 +22,8 @@ public:
 
     bool begin();
 
-    void update();
+    // void update();
+    void update(bool draw=true);
 
     void updateRobotConfig();
 

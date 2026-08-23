@@ -53,22 +53,7 @@ Menu menu(
 
 TaskHandle_t ControlTaskHandle;
 
-void ControlTask(void *pvParameters) {
-    for(;;) {
-        leftEncoder.update();
-        rightEncoder.update();
-
-        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
-            imu.update();
-            xSemaphoreGive(i2cMutex);
-        }
-
-        drive.update();
-
-        vTaskDelay(pdMS_TO_TICKS(5)); 
-    }
-}
-
+void ControlTask(void *pvParameters);
 
 
 void setup()
@@ -132,10 +117,34 @@ void loop()
     btnUp.update();
     btnSelect.update();
 
-    if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
-        menu.update();
-        xSemaphoreGive(i2cMutex);
+    if (!drive.turning() && !drive.driving())
+    {
+        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+            menu.update();
+            xSemaphoreGive(i2cMutex);
+        }
     }
+    else
+    {
+        menu.update(false);
+    }
+    
 
     vTaskDelay(pdMS_TO_TICKS(10));
+}
+
+void ControlTask(void *pvParameters) {
+    for(;;) {
+        leftEncoder.update();
+        rightEncoder.update();
+
+        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+            imu.update();
+            xSemaphoreGive(i2cMutex);
+        }
+
+        drive.update();
+
+        vTaskDelay(pdMS_TO_TICKS(5)); 
+    }
 }
