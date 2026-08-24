@@ -46,17 +46,14 @@ void Menu::update(bool draw)
         case State::MAIN:
             updateMainMenu();
             break;
-
         case State::ROBOT_CONFIG:
             updateRobotConfig();
             break;
         case State::ENCODER_TEST:
             updateEncoderTest();
             break;
-
         case State::PID_CALIBRATION:
             updatePIDCalibration();
-            return;
             break;
         case State::IMU_TEST:
             updateIMUTest();

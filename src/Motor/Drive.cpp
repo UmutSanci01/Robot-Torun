@@ -167,6 +167,11 @@ void Drive::update()
     leftPid_.setTarget(leftTargetRPM_);
     rightPid_.setTarget(rightTargetRPM_);
 
+    if (leftTargetRPM_ == 0.0f && rightTargetRPM_ == 0.0f)
+    {
+        return;
+    }
+    
     float left =
         leftPid_.update(
             leftEncoder_.rpm(),
