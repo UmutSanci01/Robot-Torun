@@ -82,8 +82,8 @@ void Motor::setPower(int8_t power)
     {
         ledcDetachPin(in1_);
         ledcDetachPin(in2_);
-        digitalWrite(in1_, HIGH);
-        digitalWrite(in2_, HIGH);
+        digitalWrite(in1_, LOW);
+        digitalWrite(in2_, LOW);
         
         ledcWrite(pwmChannel_, 0);
     }

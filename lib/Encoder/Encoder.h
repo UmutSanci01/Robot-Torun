@@ -83,6 +83,4 @@ private:
 
     static constexpr float TICKS_PER_REV =
         GEAR_RATIO * PPR * QUAD;
-
-    static constexpr float WHEEL_DIAMETER = 0.042f;
 };

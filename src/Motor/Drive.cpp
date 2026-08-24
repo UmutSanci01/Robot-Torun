@@ -144,31 +144,28 @@ void Drive::update()
         (now - previousPidMs_) /
         1000.0f;
 
-    if(dt < 0.04f)
+    if(dt < 0.02f)
         return;
 
     previousPidMs_ = now;
 
-    // SLEW RATE LIMITER
-    if (leftTargetRPM_ < leftDesiredRPM_) {
-        leftTargetRPM_ += accelStep_;
-        if (leftTargetRPM_ > leftDesiredRPM_) leftTargetRPM_ = leftDesiredRPM_;
-    } else if (leftTargetRPM_ > leftDesiredRPM_) {
-        leftTargetRPM_ -= accelStep_;
-        if (leftTargetRPM_ < leftDesiredRPM_) leftTargetRPM_ = leftDesiredRPM_;
+    // ASYMETRIC SLEW RATE LIMITER
+    if (abs(leftDesiredRPM_) < abs(leftTargetRPM_)) {
+        leftTargetRPM_ = leftDesiredRPM_; 
+    } else {
+        if (leftTargetRPM_ < leftDesiredRPM_) leftTargetRPM_ += accelStep_;
+        else if (leftTargetRPM_ > leftDesiredRPM_) leftTargetRPM_ -= accelStep_;
     }
 
-    if (rightTargetRPM_ < rightDesiredRPM_) {
-        rightTargetRPM_ += accelStep_;
-        if (rightTargetRPM_ > rightDesiredRPM_) rightTargetRPM_ = rightDesiredRPM_;
-    } else if (rightTargetRPM_ > rightDesiredRPM_) {
-        rightTargetRPM_ -= accelStep_;
-        if (rightTargetRPM_ < rightDesiredRPM_) rightTargetRPM_ = rightDesiredRPM_;
+    if (abs(rightDesiredRPM_) < abs(rightTargetRPM_)) {
+        rightTargetRPM_ = rightDesiredRPM_;
+    } else {
+        if (rightTargetRPM_ < rightDesiredRPM_) rightTargetRPM_ += accelStep_;
+        else if (rightTargetRPM_ > rightDesiredRPM_) rightTargetRPM_ -= accelStep_;
     }
 
     leftPid_.setTarget(leftTargetRPM_);
     rightPid_.setTarget(rightTargetRPM_);
-    //
 
     float left =
         leftPid_.update(

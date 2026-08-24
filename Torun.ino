@@ -81,8 +81,8 @@ void setup()
     leftEncoder.setTicksPerRevolution(5925.0f);
     rightEncoder.setTicksPerRevolution(5925.0f);
 
-    leftEncoder.setWheelDiameter(0.04408f);
-    rightEncoder.setWheelDiameter(0.04408f);
+    leftEncoder.setWheelDiameter(0.04437f);
+    rightEncoder.setWheelDiameter(0.04437f);
 
     if (!imu.begin())
     {
