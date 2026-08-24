@@ -285,18 +285,19 @@ void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     while (degreeErr > 180.0f) degreeErr -= 360.0f;
     while (degreeErr < -180.0f) degreeErr += 360.0f;
 
-    float Kp_Straight = 1.9f;
+    // float Kp_Straight = 1.9f;
     float correction = degreeErr * Kp_Straight;
 
     setTargetRPM(baseRPM + correction, baseRPM - correction);
 }
 
 bool Drive::driveDistanceIMU(float targetDistanceCM, float targetDegree, float baseRPM, IMU& imu) {
-    long leftTicks = abs(leftEncoder_.ticks()); 
-    long rightTicks = abs(rightEncoder_.ticks());
+    // long leftTicks = abs(leftEncoder_.ticks()); 
+    // long rightTicks = abs(rightEncoder_.ticks());
 
-    float averageTicks = (leftTicks + rightTicks) / 2.0f;
-    float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
+    // float averageTicks = (leftTicks + rightTicks) / 2.0f;
+    // float currentDistanceCM = (averageTicks / leftEncoder_.ticksPerRevolution()) * MotorConfig::wheelCircumferenceCM;
+    float currentDistanceCM = (abs(leftEncoder_.distance()) + abs(rightEncoder_.distance())) / 2.0f * 100.0f;
 
     if (currentDistanceCM >= targetDistanceCM) {
         stop();

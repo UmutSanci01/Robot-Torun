@@ -104,7 +104,8 @@ bool Encoder::healthy() const
 int32_t Encoder::position() const
 {
     noInterrupts();
-    int32_t p = position_;
+    // int32_t p = position_;
+    int32_t p = count_;
     interrupts();
 
     return p;
@@ -186,7 +187,8 @@ void IRAM_ATTR Encoder::handleInterrupt()
 
 int32_t Encoder::ticks() const
 {
-    return count_;
+    return position();
+    // return count_;
 }
 
 // void Encoder::reset()
