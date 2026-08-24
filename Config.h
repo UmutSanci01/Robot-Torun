@@ -15,7 +15,7 @@ namespace Config
 
     constexpr uint8_t MPU6500_ADDRESS = 0x68;
 
-    constexpr float kp = 3.f, ki = 20.f, kd = 0.002f;
+    constexpr float kp = 2.f, ki = 14.f, kd = 0.002f;
 }
 
 /*----------------------------------------------------------

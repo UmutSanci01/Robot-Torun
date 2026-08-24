@@ -171,7 +171,7 @@ void Drive::update()
     {
         return;
     }
-    
+
     float left =
         leftPid_.update(
             leftEncoder_.rpm(),
@@ -291,9 +291,9 @@ void Drive::driveStraightIMU(float baseRPM, float targetDegree, IMU& imu) {
     while (degreeErr < -180.0f) degreeErr += 360.0f;
 
     // Deadband Filter
-    if (abs(degreeErr) < 0.5f) {
-        degreeErr = 0.0f; 
-    }
+    // if (abs(degreeErr) < 0.5f) {
+    //     degreeErr = 0.0f; 
+    // }
 
     // float Kp_Straight = 1.9f;
     float correction = degreeErr * Kp_Straight;
