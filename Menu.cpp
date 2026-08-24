@@ -583,7 +583,8 @@ bool isPatternStart = false;
 int currPattern = Pattern::Square;
 
 uint8_t patternStep = 0; 
-uint8_t edgeCount = 0;   
+uint8_t edgeCount = 0;
+uint8_t turnCount = 0;
 void Menu::drawPatternTest()
 {
     display_.clearDisplay();
@@ -591,6 +592,7 @@ void Menu::drawPatternTest()
     display_.println("Pattern Test");
 
     display_.printf("Pattern: %s\n", pattern_text[currPattern]);
+    display_.printf("Turn: %d\n", turnCount);
 
     if (isPattern)
         display_.println("Patterning...");
@@ -617,6 +619,7 @@ void Menu::updatePatternTest()
         
         patternStep = 0;
         edgeCount = 0;
+        turnCount = 0;
         targetDegree = imu_.orientation().yaw; 
         redraw_ = true;
 
@@ -634,8 +637,9 @@ void Menu::updatePatternTest()
         
         isPattern = false;
         isPatternStart = false;
-        patternStep = 0; 
-        edgeCount = 0;  
+        patternStep = 0;
+        edgeCount = 0;
+        // turnCount = 0;
 
         state_ = State::MAIN;
         redraw_ = true;
@@ -668,7 +672,11 @@ void Menu::updatePatternTest()
                         if (!drive_.turning()) 
                         {
                             patternStep++;
-                            if (patternStep > 3) patternStep = 0;
+                            if (patternStep > 3)
+                            {
+                                patternStep = 0;
+                                turnCount++;
+                            }
                             
                             targetDegree += 90.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;
@@ -699,7 +707,11 @@ void Menu::updatePatternTest()
                         if (!drive_.turning()) 
                         {
                             patternStep++;
-                            if (patternStep > 3) patternStep = 0;
+                            if (patternStep > 3)
+                            {
+                                patternStep = 0;
+                                turnCount++;
+                            }
                             
                             targetDegree += 90.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;
@@ -774,6 +786,7 @@ void Menu::updatePatternTest()
                         if (!drive_.turning()) 
                         {
                             patternStep = 0;
+                            turnCount++;
                             
                             targetDegree += 135.0f;
                             while (targetDegree > 180.0f) targetDegree -= 360.0f;
