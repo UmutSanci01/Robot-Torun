@@ -568,13 +568,15 @@ enum Pattern
     Square,
     Rectangle,
     Triangle,
+    Eight,
     END
 };
 
 const char *pattern_text[] = {
     "Square",
     "Rectangle",
-    "Triangle"
+    "Triangle",
+    "Eight"
 };
 
 uint32_t patternDelay = 0;
@@ -795,6 +797,45 @@ void Menu::updatePatternTest()
                             drive_.leftEncoder().reset();
                             drive_.rightEncoder().reset();
                             turnPhase = false; 
+                        }
+                    }
+                    break;
+            }
+        }
+        else if (currPattern == Pattern::Eight)
+        {
+            switch (patternStep)
+            {
+                case 0: case 1: case 2: case 3:
+                case 4: case 5: case 6: case 7:
+                    if (!turnPhase) 
+                    {
+                        if (drive_.driveDistanceIMU(30.0f, targetDegree, 75.0f, imu_)) 
+                        {
+                            turnPhase = true;
+                        }
+                    } 
+                    else 
+                    {
+                        float turnAngle = (patternStep < 4) ? 90.0f : -90.0f;
+                        drive_.rotateIMU(targetDegree + turnAngle, imu_); 
+                        
+                        if (!drive_.turning()) 
+                        {
+                            patternStep++;
+                            if (patternStep > 7)
+                            {
+                                patternStep = 0;
+                                turnCount++;
+                            }
+                            
+                            targetDegree += turnAngle;
+                            while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                            while (targetDegree < -180.0f) targetDegree += 360.0f;
+                            
+                            drive_.leftEncoder().reset();
+                            drive_.rightEncoder().reset();
+                            turnPhase = false;
                         }
                     }
                     break;
