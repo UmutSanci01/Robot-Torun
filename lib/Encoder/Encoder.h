@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <driver/pcnt.h>
 
 class Encoder
 {
@@ -8,7 +9,8 @@ public:
 
     Encoder(
         uint8_t pinA,
-        uint8_t pinB
+        uint8_t pinB,
+        pcnt_unit_t unit
     );
 
     bool begin();
@@ -48,6 +50,7 @@ private:
     
     uint8_t pinA_;
     uint8_t pinB_;
+    pcnt_unit_t pcntUnit_;
 
     bool initialized_;
 
@@ -61,6 +64,7 @@ private:
 
     float distance_;
 
+    volatile int32_t overflowCount_;
     int32_t count_;
 
     static Encoder* instance0_;
@@ -83,4 +87,6 @@ private:
 
     static constexpr float TICKS_PER_REV =
         GEAR_RATIO * PPR * QUAD;
+
+    static void IRAM_ATTR pcntOverflowIsr(void *arg);
 };

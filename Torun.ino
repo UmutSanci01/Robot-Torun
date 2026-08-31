@@ -28,8 +28,8 @@ Button btnSelect(18);
 
 Motor leftMotor(26, 25, 14, 0);
 Motor rightMotor(32, 33, 14, 1);
-Encoder leftEncoder(34, 35);
-Encoder rightEncoder(39, 36);
+Encoder leftEncoder(34, 35, PCNT_UNIT_0);
+Encoder rightEncoder(39, 36, PCNT_UNIT_1);
 
 
 Drive drive(
