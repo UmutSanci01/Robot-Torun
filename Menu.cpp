@@ -404,7 +404,7 @@ void Menu::updateEncoderTest()
 
     if (isDriveStart)
     {
-        if (drive_.driveDistanceIMU(targetDistCM, targetDegree, 85, imu_))
+        if (drive_.driveDistanceIMU(targetDistCM, targetDegree, 75, imu_))
         {
             isDrive = false;
             isDriveStart = false;
