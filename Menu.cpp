@@ -5,7 +5,8 @@ Menu::Menu(
     Button& btnSelect,
     Adafruit_SSD1306& display,
     Drive& drive,
-    IMU& imu
+    IMU& imu,
+    ToFSensor& tof
 )
 :
 btnUp_(btnUp),
@@ -16,7 +17,8 @@ imu_(imu),
 state_(State::MAIN),
 cursor_(0),
 redraw_(true),
-lastRefreshMs_(0)
+lastRefreshMs_(0),
+ToFSensor_(tof)
 {
 }
 
@@ -60,6 +62,9 @@ void Menu::update(bool draw)
             break;
         case State::PATTERN_TEST:
             updatePatternTest();
+            break;
+        case State::TOF_TEST:
+            updateToFTest();
             break;
         default:
             break;
@@ -125,7 +130,12 @@ void Menu::updateMainMenu()
                     state_ = State::PATTERN_TEST;
                     redraw_ = true;
                     return;
-                    break; 
+                    break;
+                case 1:
+                    state_ = State::TOF_TEST;
+                    redraw_ = true;
+                    return;
+                    break;
             }
         }
         redraw_ = true;
@@ -148,7 +158,7 @@ const char* items[][4] =
     },
     {
         "Pattern Test",
-        ".",
+        "ToF Test",
         ".",
         "."
     }
@@ -850,6 +860,50 @@ void Menu::updatePatternTest()
     if (redraw_)
     {
         drawPatternTest();
+        redraw_ = false;
+    }
+}
+
+void Menu::updateToFTest()
+{
+    display_.clearDisplay();
+    display_.setCursor(0, 0);
+    display_.println("ToF Sensor Test");
+
+    display_.print("Distance :");
+    display_.println(ToFSensor_.getDistance());
+    display_.display();
+}
+
+void Menu::drawToFTest()
+{
+    if(btnSelect_.click)
+    {
+        redraw_=true;
+    }
+
+    if (btnUp_.click)
+    {
+        redraw_=true;
+    }
+
+    if (btnSelect_.longPress)
+    {
+        redraw_ = true;
+    }
+
+    if(btnUp_.longPress)
+    {
+        drive_.stop();
+
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    if(redraw_)
+    {
+        drawToFTest();
         redraw_ = false;
     }
 }

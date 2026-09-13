@@ -7,6 +7,7 @@
 #include "lib\Motor\Drive.h"
 #include "lib\IMU\IMU.h"
 #include "Config.h"
+#include "ToFSensor.h"
 
 class Menu
 {
@@ -17,7 +18,8 @@ public:
         Button& btnSelect,
         Adafruit_SSD1306& display,
         Drive& drive,
-        IMU& imu
+        IMU& imu,
+        ToFSensor& tof
     );
 
     bool begin();
@@ -28,6 +30,10 @@ public:
     void updateRobotConfig();
 
     void drawRobotConfig();
+
+    void updateToFTest();
+
+    void drawToFTest();
 
     // void drawMotorPower();
 
@@ -54,7 +60,8 @@ private:
       ENCODER_TEST,
       PID_CALIBRATION,
       IMU_TEST,
-      PATTERN_TEST
+      PATTERN_TEST,
+      TOF_TEST
   };
 
     State state_;
@@ -62,6 +69,7 @@ private:
     Button& btnUp_;
     Button& btnSelect_;
     Adafruit_SSD1306& display_;
+    ToFSensor& ToFSensor_;
 
     Drive& drive_;
     IMU& imu_;
