@@ -38,9 +38,9 @@ public:
 
     int8_t power() const;
 
-    float leftDistance() const;
+    float leftDistance() const; // meter
 
-    float rightDistance() const;
+    float rightDistance() const; // meter
 
     void resetDistance();
 

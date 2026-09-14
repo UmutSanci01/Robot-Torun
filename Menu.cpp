@@ -576,6 +576,7 @@ enum Pattern
     Rectangle,
     Triangle,
     Eight,
+    ToFDrive,
     END
 };
 
@@ -583,7 +584,8 @@ const char *pattern_text[] = {
     "Square",
     "Rectangle",
     "Triangle",
-    "Eight"
+    "Eight",
+    "ToFDrive"
 };
 
 uint32_t patternDelay = 0;
@@ -846,6 +848,54 @@ void Menu::updatePatternTest()
                         }
                     }
                     break;
+            }
+        }
+        else if (currPattern == Pattern::ToFDrive)
+        {
+            static float randomTurnAngle = 90.0f;
+            static float dynamicTargetDistance = 200.0f;
+            static bool brakingPhase = false;
+
+            if (!turnPhase) 
+            {
+                uint16_t dist = ToFSensor_.getDistance();
+                
+                if (!brakingPhase) 
+                {
+                    if (dist > 30 && dist < 500) // mm
+                    {
+                        brakingPhase = true;
+                        float currentDistance = (abs(drive_.leftDistance()) + abs(drive_.rightDistance())) / 2.0f * 100.0f;
+                        
+                        float distanceToBrake = (dist / 10.0f) - 20.0f;
+                        if (distanceToBrake < 3.0f) distanceToBrake = 3.0f;
+
+                        dynamicTargetDistance = currentDistance + distanceToBrake;
+                    }
+                }
+
+                if (drive_.driveDistanceIMU(dynamicTargetDistance, targetDegree, 75.0f, imu_)) 
+                {
+                    randomTurnAngle = (random(2) == 0) ? 90.0f : -90.0f;
+                    turnPhase = true;
+                    brakingPhase = false;
+                    dynamicTargetDistance = 200.0f; // cm
+                }
+            } 
+            else 
+            {
+                drive_.rotateIMU(targetDegree + randomTurnAngle, imu_); 
+
+                if (!drive_.turning()) 
+                {
+                    targetDegree += randomTurnAngle;
+                    while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                    while (targetDegree < -180.0f) targetDegree += 360.0f;
+
+                    drive_.leftEncoder().reset();
+                    drive_.rightEncoder().reset();
+                    turnPhase = false;
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
-#ifndef TOFSENSOR_H
-#define TOFSENSOR_H
+#pragma once
+// #ifndef TOFSENSOR_H
+// #define TOFSENSOR_H
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -16,8 +17,8 @@ public:
     ToFSensor(uint8_t i2c_address = 0x29);
     bool begin();
     void update();
-    uint16_t getDistance();
+    uint16_t getDistance(); // mm
     bool isReady();
 };
 
-#endif
+// #endif

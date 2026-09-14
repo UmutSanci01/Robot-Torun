@@ -40,7 +40,13 @@ void ToFSensor::update() {
 
         Wire.requestFrom((uint8_t)address, (uint8_t)2);
         if (Wire.available() >= 2) {
-            lastDistance = (Wire.read() << 8) | Wire.read();
+            uint16_t raw_dist = (Wire.read() << 8) | Wire.read();
+
+            const uint16_t OFFSET = 50; 
+            
+            if (raw_dist > OFFSET) {
+                lastDistance = raw_dist - OFFSET;
+            }
         }
     }
 }
