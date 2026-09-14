@@ -11,6 +11,7 @@
 #include "lib\IMU\IMU.h"
 #include "Config.h"
 #include "ToFSensor.h"
+#include "Buzzer.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -27,6 +28,7 @@ Adafruit_SSD1306 display(
 
 Button btnUp(5);
 Button btnSelect(18);
+Buzzer buzzer(4);
 
 Motor leftMotor(26, 25, 14, 0);
 Motor rightMotor(32, 33, 14, 1);
@@ -61,6 +63,8 @@ void testVL53();
 
 void setup()
 {
+    delay(1000); // It waits one second to ignore initial vibrations and better calibrate for IMU.
+
     Serial.begin(115200);
 
     Wire.begin();
@@ -116,6 +120,7 @@ void setup()
         0
     );
 
+    buzzer.beep(5);
     menu.begin();
 }
 

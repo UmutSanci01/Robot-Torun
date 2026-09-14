@@ -103,7 +103,6 @@ void Menu::updateMainMenu()
             {
                 case 0:
                     state_ = State::ROBOT_CONFIG;
-                    redraw_ = true;
                     return;
                     break;
 
@@ -128,12 +127,11 @@ void Menu::updateMainMenu()
             {
                 case 0:
                     state_ = State::PATTERN_TEST;
-                    redraw_ = true;
                     return;
                     break;
                 case 1:
                     state_ = State::TOF_TEST;
-                    redraw_ = true;
+                    Serial.println("State TOF.");
                     return;
                     break;
             }
@@ -894,6 +892,7 @@ void Menu::drawToFTest()
 
     if(btnUp_.longPress)
     {
+        Serial.println("Menuye Donuluyor.");
         drive_.stop();
 
         state_ = State::MAIN;
