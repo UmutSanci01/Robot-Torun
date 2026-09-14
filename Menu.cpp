@@ -131,7 +131,6 @@ void Menu::updateMainMenu()
                     break;
                 case 1:
                     state_ = State::TOF_TEST;
-                    Serial.println("State TOF.");
                     return;
                     break;
             }
@@ -862,7 +861,7 @@ void Menu::updatePatternTest()
     }
 }
 
-void Menu::updateToFTest()
+void Menu::drawToFTest()
 {
     display_.clearDisplay();
     display_.setCursor(0, 0);
@@ -873,7 +872,7 @@ void Menu::updateToFTest()
     display_.display();
 }
 
-void Menu::drawToFTest()
+void Menu::updateToFTest()
 {
     if(btnSelect_.click)
     {
@@ -890,9 +889,8 @@ void Menu::drawToFTest()
         redraw_ = true;
     }
 
-    if(btnUp_.longPress)
+    if (btnUp_.longPress)
     {
-        Serial.println("Menuye Donuluyor.");
         drive_.stop();
 
         state_ = State::MAIN;
