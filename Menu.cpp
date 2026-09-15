@@ -852,19 +852,31 @@ void Menu::updatePatternTest()
         }
         else if (currPattern == Pattern::ToFDrive)
         {
+            enum LocalState { DRIVING, BRAKING, WAIT, TURNING };
+            static LocalState state = DRIVING;
+            
             static float randomTurnAngle = 90.0f;
-            static float dynamicTargetDistance = 200.0f;
-            static bool brakingPhase = false;
+            static float dynamicTargetDistance = 200.0f; // cm
+            static unsigned long waitTimer = 0;
 
-            if (!turnPhase) 
+            uint16_t dist = ToFSensor_.getDistance();
+
+            switch (state)
             {
-                uint16_t dist = ToFSensor_.getDistance();
-                
-                if (!brakingPhase) 
-                {
-                    if (dist > 30 && dist < 500) // mm
+                case DRIVING:
+                case BRAKING:
+                    if (dist > 30 && dist < 200) 
                     {
-                        brakingPhase = true;
+                        drive_.stop();
+                        randomTurnAngle = (random(2) == 0) ? 90.0f : -90.0f;
+                        waitTimer = millis();
+                        state = WAIT;
+                        break;
+                    }
+
+                    if (state == DRIVING && dist >= 200 && dist < 500) 
+                    {
+                        state = BRAKING;
                         float currentDistance = (abs(drive_.leftDistance()) + abs(drive_.rightDistance())) / 2.0f * 100.0f;
                         
                         float distanceToBrake = (dist / 10.0f) - 20.0f;
@@ -872,30 +884,38 @@ void Menu::updatePatternTest()
 
                         dynamicTargetDistance = currentDistance + distanceToBrake;
                     }
-                }
 
-                if (drive_.driveDistanceIMU(dynamicTargetDistance, targetDegree, 75.0f, imu_)) 
-                {
-                    randomTurnAngle = (random(2) == 0) ? 90.0f : -90.0f;
-                    turnPhase = true;
-                    brakingPhase = false;
-                    dynamicTargetDistance = 200.0f; // cm
-                }
-            } 
-            else 
-            {
-                drive_.rotateIMU(targetDegree + randomTurnAngle, imu_); 
+                    if (drive_.driveDistanceIMU(dynamicTargetDistance, targetDegree, 75.0f, imu_)) 
+                    {
+                        randomTurnAngle = (random(2) == 0) ? 90.0f : -90.0f;
+                        waitTimer = millis();
+                        state = WAIT;
+                    }
+                    break;
 
-                if (!drive_.turning()) 
-                {
-                    targetDegree += randomTurnAngle;
-                    while (targetDegree > 180.0f) targetDegree -= 360.0f;
-                    while (targetDegree < -180.0f) targetDegree += 360.0f;
+                case WAIT:
+                    if (millis() - waitTimer > 300) // 300 milisaniye dinlenme
+                    {
+                        state = TURNING;
+                    }
+                    break;
 
-                    drive_.leftEncoder().reset();
-                    drive_.rightEncoder().reset();
-                    turnPhase = false;
-                }
+                case TURNING:
+                    drive_.rotateIMU(targetDegree + randomTurnAngle, imu_); 
+
+                    if (!drive_.turning()) 
+                    {
+                        targetDegree += randomTurnAngle;
+                        while (targetDegree > 180.0f) targetDegree -= 360.0f;
+                        while (targetDegree < -180.0f) targetDegree += 360.0f;
+
+                        drive_.leftEncoder().reset();
+                        drive_.rightEncoder().reset();
+                        
+                        dynamicTargetDistance = 200.0f;
+                        state = DRIVING;
+                    }
+                    break;
             }
         }
     }
