@@ -81,6 +81,8 @@ void QMC5883::startCalibration() {
 }
 
 void QMC5883::finishCalibration() {
+    if (!isCalibrating) return; // Calibration was not started.
+
     isCalibrating = false;
     
     hardOffsetX = (maxX + minX) / 2.0f;

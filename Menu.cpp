@@ -662,7 +662,8 @@ void Menu::updatePatternTest()
         edgeCount = 0;
         // turnCount = 0;
 
-        compass_.finishCalibration();
+        if (currPattern == Pattern::Eight)
+            compass_.finishCalibration();
 
         state_ = State::MAIN;
         redraw_ = true;
@@ -934,7 +935,8 @@ void Menu::updatePatternTest()
     else if (isPattern && (millis() - patternDelay > 2000))
     {
         isPatternStart = true;
-        compass_.startCalibration();
+        if (currPattern == Pattern::Eight)
+            compass_.startCalibration();
     }
 
     if (redraw_)
@@ -993,14 +995,14 @@ void Menu::drawMagnetometerTest()
     display_.clearDisplay();
 
     // 1. Pusula açısını hesapla (Eğer compass_ sınıfı direkt açıyı dönmüyorsa atan2 ile buluyoruz)
-    float heading = atan2(compass_.getY(), compass_.getX());
+    float heading = atan2(compass_.getX(), -compass_.getY());
     float headingDegrees = heading * 180.0f / PI;
     if (headingDegrees < 0) headingDegrees += 360.0f;
 
     // 2. Çizim merkezini ve yarıçapını belirle (128x64 OLED varsayımı)
     int cx = 64; // Ekranın X merkezi
     int cy = 35; // Ekranın Y merkezi (Yazıya üstte yer bırakmak için biraz aşağı kaydırdık)
-    int r = 24;  // Pusula çemberinin yarıçapı
+    int r = 23;  // Pusula çemberinin yarıçapı
 
     // Çemberi ve merkez noktasını çiz
     display_.drawCircle(cx, cy, r, WHITE);

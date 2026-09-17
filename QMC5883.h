@@ -30,7 +30,7 @@ public:
     
     void startCalibration();
     void finishCalibration();
-    
+
     float getX() { return mX; }
     float getY() { return mY; }
     float getZ() { return mZ; }
