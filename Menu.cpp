@@ -894,7 +894,7 @@ void Menu::updatePatternTest()
                     break;
 
                 case WAIT:
-                    if (millis() - waitTimer > 300) // 300 milisaniye dinlenme
+                    if (millis() - waitTimer > 300) // 300 milisecond delay
                     {
                         state = TURNING;
                     }
