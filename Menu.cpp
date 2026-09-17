@@ -6,7 +6,8 @@ Menu::Menu(
     Adafruit_SSD1306& display,
     Drive& drive,
     IMU& imu,
-    ToFSensor& tof
+    ToFSensor& tof,
+    QMC5883& compass
 )
 :
 btnUp_(btnUp),
@@ -18,7 +19,8 @@ state_(State::MAIN),
 cursor_(0),
 redraw_(true),
 lastRefreshMs_(0),
-ToFSensor_(tof)
+ToFSensor_(tof),
+compass_(compass)
 {
 }
 
@@ -887,7 +889,7 @@ void Menu::updatePatternTest()
 
                     if (drive_.driveDistanceIMU(dynamicTargetDistance, targetDegree, 75.0f, imu_)) 
                     {
-                        randomTurnAngle = (random(2) == 0) ? 90.0f : -90.0f;
+                        randomTurnAngle = (random(2) == 0) ? 90.0f  : -90.0f;
                         waitTimer = millis();
                         state = WAIT;
                     }

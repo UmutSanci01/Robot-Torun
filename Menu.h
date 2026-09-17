@@ -8,6 +8,7 @@
 #include "lib\IMU\IMU.h"
 #include "Config.h"
 #include "ToFSensor.h"
+#include "QMC5883.h"
 
 class Menu
 {
@@ -19,12 +20,12 @@ public:
         Adafruit_SSD1306& display,
         Drive& drive,
         IMU& imu,
-        ToFSensor& tof
+        ToFSensor& tof,
+        QMC5883& compass
     );
 
     bool begin();
 
-    // void update();
     void update(bool draw=true);
 
     void updateRobotConfig();
@@ -34,8 +35,6 @@ public:
     void updateToFTest();
 
     void drawToFTest();
-
-    // void drawMotorPower();
 
     void updateIMUTest();
     void drawIMUTest();
@@ -70,6 +69,7 @@ private:
     Button& btnSelect_;
     Adafruit_SSD1306& display_;
     ToFSensor& ToFSensor_;
+    QMC5883& compass_;
 
     Drive& drive_;
     IMU& imu_;
