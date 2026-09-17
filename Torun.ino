@@ -51,7 +51,8 @@ Menu menu(
     display,
     drive,
     imu,
-    frontToFSensor
+    frontToFSensor,
+    compass
 );
 
 
@@ -125,6 +126,17 @@ void setup()
     menu.begin();
 }
 
+// void printOffsets()
+// {
+//     Serial.print("H_X "); Serial.print(compass.hardOffsetX);
+//     Serial.print(" H_Y "); Serial.print(compass.hardOffsetY);
+//     Serial.print(" H_Z "); Serial.println(compass.hardOffsetZ);
+
+//     Serial.print("S_X "); Serial.print(compass.softScaleX);
+//     Serial.print(" S_Y "); Serial.print(compass.softScaleY);
+//     Serial.print(" S_Z "); Serial.println(compass.softScaleZ);
+// }
+
 void loop()
 {
     btnUp.update();
@@ -132,7 +144,7 @@ void loop()
     
     // if (btnUp.click) {
     //     if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
-    //         ofsetleriYazdir();
+    //         printOffsets();
     //         xSemaphoreGive(i2cMutex);
     //     }
     // }
@@ -152,12 +164,12 @@ void loop()
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void printMangneto()
-{
-    Serial.print("M_X "); Serial.print(compass.getX());
-    Serial.print("M_Y "); Serial.print(compass.getY());
-    Serial.print("M_Z "); Serial.println(compass.getZ());
-}
+// void printMangneto()
+// {
+//     Serial.print("M_X "); Serial.print(compass.getX());
+//     Serial.print(" M_Y "); Serial.print(compass.getY());
+//     Serial.print(" M_Z "); Serial.println(compass.getZ());
+// }
 
 void ControlTask(void *pvParameters) {
     for(;;) {
@@ -167,7 +179,7 @@ void ControlTask(void *pvParameters) {
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
             imu.update();
             compass.update();
-            printMangneto();
+            // printMangneto();
             frontToFSensor.update();
 
             xSemaphoreGive(i2cMutex);

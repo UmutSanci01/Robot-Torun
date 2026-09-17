@@ -97,6 +97,7 @@ void QMC5883::finishCalibration() {
     softScaleY = avg_chord / chordY;
     softScaleZ = avg_chord / chordZ;
     
+    setCalibration(hardOffsetX, hardOffsetY, hardOffsetZ, softScaleX, softScaleY, softScaleZ);
     // Serial.println("--- CALIBRATION COMPLETED ---");
     // Serial.printf("Hard Iron Offsets -> X: %.2f | Y: %.2f | Z: %.2f\n", hardOffsetX, hardOffsetY, hardOffsetZ);
     // Serial.printf("Soft Iron Scales  -> X: %.2f | Y: %.2f | Z: %.2f\n", softScaleX, softScaleY, softScaleZ);

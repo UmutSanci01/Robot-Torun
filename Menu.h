@@ -48,6 +48,9 @@ public:
     void drawPatternTest();
     void updatePatternTest();
 
+    void drawMagnetometerTest();
+    void updateMagnetometerTest();
+
 private:
 
   enum class State
@@ -60,7 +63,8 @@ private:
       PID_CALIBRATION,
       IMU_TEST,
       PATTERN_TEST,
-      TOF_TEST
+      TOF_TEST,
+      COMPASS_TEST
   };
 
     State state_;

@@ -68,6 +68,9 @@ void Menu::update(bool draw)
         case State::TOF_TEST:
             updateToFTest();
             break;
+        case State::COMPASS_TEST:
+            updateMagnetometerTest();
+            break;
         default:
             break;
     }
@@ -135,6 +138,10 @@ void Menu::updateMainMenu()
                     state_ = State::TOF_TEST;
                     return;
                     break;
+                case 2:
+                    state_ = State::COMPASS_TEST;
+                    return;
+                    break;
             }
         }
         redraw_ = true;
@@ -158,10 +165,11 @@ const char* items[][4] =
     {
         "Pattern Test",
         "ToF Test",
-        ".",
+        "Compass Test",
         "."
     }
 };
+
 void Menu::drawMainMenu()
 {
     display_.clearDisplay();
@@ -654,6 +662,8 @@ void Menu::updatePatternTest()
         edgeCount = 0;
         // turnCount = 0;
 
+        compass_.finishCalibration();
+
         state_ = State::MAIN;
         redraw_ = true;
         return;
@@ -924,6 +934,7 @@ void Menu::updatePatternTest()
     else if (isPattern && (millis() - patternDelay > 2000))
     {
         isPatternStart = true;
+        compass_.startCalibration();
     }
 
     if (redraw_)
@@ -973,6 +984,81 @@ void Menu::updateToFTest()
     if(redraw_)
     {
         drawToFTest();
+        redraw_ = false;
+    }
+}
+
+void Menu::drawMagnetometerTest()
+{
+    display_.clearDisplay();
+
+    // 1. Pusula açısını hesapla (Eğer compass_ sınıfı direkt açıyı dönmüyorsa atan2 ile buluyoruz)
+    float heading = atan2(compass_.getY(), compass_.getX());
+    float headingDegrees = heading * 180.0f / PI;
+    if (headingDegrees < 0) headingDegrees += 360.0f;
+
+    // 2. Çizim merkezini ve yarıçapını belirle (128x64 OLED varsayımı)
+    int cx = 64; // Ekranın X merkezi
+    int cy = 35; // Ekranın Y merkezi (Yazıya üstte yer bırakmak için biraz aşağı kaydırdık)
+    int r = 24;  // Pusula çemberinin yarıçapı
+
+    // Çemberi ve merkez noktasını çiz
+    display_.drawCircle(cx, cy, r, WHITE);
+    display_.fillCircle(cx, cy, 2, WHITE);
+
+    // 3. İbrenin uç noktasını hesapla
+    // OLED ekranlarda Y ekseni aşağı doğru artar. 
+    // 0 derecenin sağ (Doğu) yerine ekranın üstünü (Kuzey) göstermesi için açıdan 90 derece çıkarıyoruz.
+    float rad = (headingDegrees - 90.0f) * (PI / 180.0f);
+    int endX = cx + (int)(r * cos(rad));
+    int endY = cy + (int)(r * sin(rad));
+
+    // İbreyi çiz (Merkezden uç noktaya çizgi)
+    display_.drawLine(cx, cy, endX, endY, WHITE);
+
+    // Ana yönlerin harflerini çemberin dışına yerleştir
+    display_.setTextSize(1);
+    display_.setCursor(cx - 2, cy - r - 9); display_.print("N");
+    display_.setCursor(cx - 2, cy + r + 2); display_.print("S");
+    display_.setCursor(cx + r + 4, cy - 3); display_.print("E");
+    display_.setCursor(cx - r - 9, cy - 3); display_.print("W");
+
+    // 4. Güncel açıyı sol üst köşeye yaz
+    display_.setCursor(0, 0);
+    display_.print("Aci:");
+    display_.print((int)headingDegrees);
+    display_.print((char)247); // Derece sembolü
+
+    display_.display();
+}
+void Menu::updateMagnetometerTest()
+{
+    // Buton kontrollerin aynen kalıyor
+    if (btnSelect_.click) { redraw_ = true; }
+    if (btnUp_.click) { redraw_ = true; }
+    if (btnSelect_.longPress) { redraw_ = true; }
+
+    if (btnUp_.longPress)
+    {
+        drive_.stop();
+        state_ = State::MAIN;
+        redraw_ = true;
+        return;
+    }
+
+    // CANLI AKIŞ: Ekranı her 100 milisaniyede bir zorla güncelle
+    static unsigned long lastUpdate = 0;
+    if (millis() - lastUpdate > 100) 
+    {
+        lastUpdate = millis();
+        // Burada sensörün verilerini oku ki drawMagnetometerTest güncel veriyi çizsin
+        compass_.update(); 
+        redraw_ = true;
+    }
+
+    if (redraw_)
+    {
+        drawMagnetometerTest();
         redraw_ = false;
     }
 }
