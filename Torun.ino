@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "ToFSensor.h"
 #include "Buzzer.h"
+#include "QMC5883.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -33,6 +34,7 @@ Motor rightMotor(32, 33, 14, 1);
 Encoder leftEncoder(34, 35, PCNT_UNIT_0);
 Encoder rightEncoder(39, 36, PCNT_UNIT_1);
 ToFSensor frontToFSensor;
+QMC5883 compass;
 
 Drive drive(
     leftMotor,
@@ -49,7 +51,8 @@ Menu menu(
     display,
     drive,
     imu,
-    frontToFSensor
+    frontToFSensor,
+    compass
 );
 
 
@@ -94,18 +97,20 @@ void setup()
 
     if (!imu.begin())
     {
-        for(;;);
+        Serial.println("IMU not found.");
     }
 
     if (!imu.calibrate())
     {
-        for(;;);
+        Serial.println("IMU could not calibrate.");
     }
     
     drive.begin();
     drive.stop();
     drive.enable();
     drive.setPIDTunings(Config::kp, Config::ki, Config::kd);
+
+    compass.begin();
 
     xTaskCreatePinnedToCore(
         ControlTask,
@@ -121,11 +126,29 @@ void setup()
     menu.begin();
 }
 
+// void printOffsets()
+// {
+//     Serial.print("H_X "); Serial.print(compass.hardOffsetX);
+//     Serial.print(" H_Y "); Serial.print(compass.hardOffsetY);
+//     Serial.print(" H_Z "); Serial.println(compass.hardOffsetZ);
+
+//     Serial.print("S_X "); Serial.print(compass.softScaleX);
+//     Serial.print(" S_Y "); Serial.print(compass.softScaleY);
+//     Serial.print(" S_Z "); Serial.println(compass.softScaleZ);
+// }
+
 void loop()
 {
     btnUp.update();
     btnSelect.update();
-
+    
+    // if (btnUp.click) {
+    //     if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+    //         printOffsets();
+    //         xSemaphoreGive(i2cMutex);
+    //     }
+    // }
+    
     if (!drive.turning() && !drive.driving())
     {
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
@@ -137,10 +160,16 @@ void loop()
     {
         menu.update(false);
     }
-    
 
     vTaskDelay(pdMS_TO_TICKS(10));
 }
+
+// void printMangneto()
+// {
+//     Serial.print("M_X "); Serial.print(compass.getX());
+//     Serial.print(" M_Y "); Serial.print(compass.getY());
+//     Serial.print(" M_Z "); Serial.println(compass.getZ());
+// }
 
 void ControlTask(void *pvParameters) {
     for(;;) {
@@ -149,9 +178,13 @@ void ControlTask(void *pvParameters) {
 
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
             imu.update();
+            compass.update();
+            // printMangneto();
             frontToFSensor.update();
+
             xSemaphoreGive(i2cMutex);
         }
+        
 
         drive.update();
 
