@@ -30,5 +30,5 @@ namespace IMUConfig
     constexpr float UPDATE_RATE_HZ = 200.0f;
     constexpr float UPDATE_PERIOD = 1.0f / UPDATE_RATE_HZ;
 
-    constexpr uint16_t CALIBRATION_SAMPLES = 600;
+    constexpr uint16_t CALIBRATION_SAMPLES = 300;
 }
