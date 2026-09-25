@@ -996,9 +996,9 @@ void Menu::drawMagnetometerTest()
 
     // 1. atan2(Left, Front)
     #if TARGET_ROBOT == 1
-        float heading = atan2(compass_.getX(), compass_.getY());
+        float heading = atan2(compass_.getY(), compass_.getX());
     #elif TARGET_ROBOT == 2
-        float heading = atan2(-compass_.getY(), compass_.getX());
+        float heading = atan2(compass_.getY(), compass_.getX());
     #endif
 
     float headingDegrees = heading * 180.0f / PI;

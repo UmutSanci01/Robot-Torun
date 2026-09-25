@@ -115,7 +115,7 @@ bool IMU::calibrate()
             gyroBias_.x += gyr.x;
             gyroBias_.y += gyr.y;
             gyroBias_.z += gyr.z;
-            delay(15);
+            delay(3);
         }
     #elif TARGET_ROBOT == 2
         for(uint16_t i = 0; i < IMUConfig::CALIBRATION_SAMPLES; i++) {
@@ -126,7 +126,7 @@ bool IMU::calibrate()
             gyroBias_.y += (rawData[1] / 131.0f);
             gyroBias_.z += (rawData[2] / 131.0f);
             
-            delay(15);
+            delay(3);
         }
     #endif
 

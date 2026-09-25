@@ -28,7 +28,7 @@
     Motor rightMotor(32, 33, 14, 1);
     Encoder leftEncoder(34, 35, PCNT_UNIT_0);
     Encoder rightEncoder(39, 36, PCNT_UNIT_1);
-
+    Button btnSelect(18);
 #elif TARGET_ROBOT == 2
     TwoWire I2C_OLED = TwoWire(1);
     // TwoWire I2C_SENSORS = TwoWire(1);
@@ -42,10 +42,11 @@
     Motor rightMotor(27, 14, 14, 1);
     Encoder leftEncoder(34, 35, PCNT_UNIT_0);
     Encoder rightEncoder(32, 33, PCNT_UNIT_1);
+    Button btnSelect(23);
+
 #endif
 
 Button btnUp(5);
-Button btnSelect(18);
 Buzzer buzzer(4);
 ToFSensor frontToFSensor;
 QMC5883 compass;

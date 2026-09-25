@@ -43,15 +43,15 @@ void QMC5883::update() {
             int16_t raw_z = (int16_t)((z_msb << 8) | z_lsb);
 
             float mag_x, mag_y;
-            float mag_z = (float)raw_z;
+            float mag_z = (float)-raw_z;
 
             // mag_x = front, mag_y = left
             #if TARGET_ROBOT == 1
                 mag_x = (float)-raw_y;
                 mag_y = (float)-raw_x;
             #elif TARGET_ROBOT == 2
-                mag_x = (float)-raw_x;
-                mag_y = (float)raw_y;
+                mag_x = (float)raw_y;
+                mag_y = (float)-raw_x;
             #endif
 
             if (isCalibrating) {
