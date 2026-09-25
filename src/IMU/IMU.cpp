@@ -74,9 +74,9 @@ bool IMU::update()
         accel_.y = rawData[4] / 16384.0f;
         accel_.z = rawData[5] / 16384.0f;
 
-        gyro_.x = (rawData[0] / 131.0f) - gyroBias_.x;
-        gyro_.y = (rawData[1] / 131.0f) - gyroBias_.y;
-        gyro_.z = (rawData[2] / 131.0f) - gyroBias_.z;
+        gyro_.x = (rawData[0] / 16.4f) - gyroBias_.x;
+        gyro_.y = (rawData[1] / 16.4f) - gyroBias_.y;
+        gyro_.z = (rawData[2] / 16.4f) - gyroBias_.z;
     #endif
 
     gyro_.x = (gyro_.x > -0.50f && gyro_.x < 0.50f) ? 0.0f : gyro_.x;
@@ -122,9 +122,9 @@ bool IMU::calibrate()
             int16_t rawData[6] = {0};
             sensor_.getAccelGyroData(rawData);
             
-            gyroBias_.x += (rawData[0] / 131.0f);
-            gyroBias_.y += (rawData[1] / 131.0f);
-            gyroBias_.z += (rawData[2] / 131.0f);
+            gyroBias_.x += (rawData[0] / 16.4f);
+            gyroBias_.y += (rawData[1] / 16.4f);
+            gyroBias_.z += (rawData[2] / 16.4f);
             
             delay(3);
         }
