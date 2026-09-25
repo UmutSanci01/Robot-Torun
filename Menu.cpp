@@ -994,8 +994,13 @@ void Menu::drawMagnetometerTest()
 {
     display_.clearDisplay();
 
-    // 1. Pusula açısını hesapla (Eğer compass_ sınıfı direkt açıyı dönmüyorsa atan2 ile buluyoruz)
-    float heading = atan2(compass_.getX(), compass_.getY());
+    // 1. atan2(Left, Front)
+    #if TARGET_ROBOT == 1
+        float heading = atan2(compass_.getX(), compass_.getY());
+    #elif TARGET_ROBOT == 2
+        float heading = atan2(-compass_.getY(), compass_.getX());
+    #endif
+
     float headingDegrees = heading * 180.0f / PI;
     if (headingDegrees < 0) headingDegrees += 360.0f;
 

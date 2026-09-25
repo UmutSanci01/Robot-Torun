@@ -7,6 +7,8 @@
 
 class ToFSensor {
 private:
+    TwoWire* _wire;
+
     uint8_t address;
     uint32_t lastReadTime;
     uint16_t lastDistance;
@@ -15,7 +17,7 @@ private:
 
 public:
     ToFSensor(uint8_t i2c_address = 0x29);
-    bool begin();
+    bool begin(TwoWire* wire = &Wire);
     void update();
     uint16_t getDistance(); // mm
     bool isReady();

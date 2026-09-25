@@ -30,8 +30,8 @@
     Encoder rightEncoder(39, 36, PCNT_UNIT_1);
 
 #elif TARGET_ROBOT == 2
-    TwoWire I2C_OLED = TwoWire(0);
-    TwoWire I2C_SENSORS = TwoWire(1);
+    TwoWire I2C_OLED = TwoWire(1);
+    // TwoWire I2C_SENSORS = TwoWire(1);
     
     #define LOCK_I2C() (true)
     #define UNLOCK_I2C() 
@@ -80,29 +80,29 @@ void setup()
     delay(1000); // It waits one second to ignore initial vibrations and better calibrate for IMU.
     Serial.begin(115200);
 
-#if TARGET_ROBOT == 1
-    Wire.begin();
-    Wire.setClock(400000);
-    i2cMutex = xSemaphoreCreateMutex();
-    
-    frontToFSensor.begin();
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-    imu.begin();
-    compass.begin();
+    #if TARGET_ROBOT == 1
+        Wire.begin();
+        Wire.setClock(400000);
+        i2cMutex = xSemaphoreCreateMutex();
+        
+        frontToFSensor.begin();
+        display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+        imu.begin();
+        compass.begin();
 
-#elif TARGET_ROBOT == 2
-    I2C_OLED.begin(21, 22);
-    I2C_OLED.setClock(400000);
-    
-    I2C_SENSORS.begin(18, 19);
-    I2C_SENSORS.setClock(400000);
-    
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-    
-    frontToFSensor.begin(&I2C_SENSORS);
-    imu.begin(&I2C_SENSORS);
-    compass.begin(&I2C_SENSORS);
-#endif
+    #elif TARGET_ROBOT == 2
+        I2C_OLED.begin(21, 22); 
+        I2C_OLED.setClock(400000);
+
+        display.begin(SSD1306_SWITCHCAPVCC, 0x3C); 
+
+        Wire.begin(18, 19);
+        Wire.setClock(400000);
+        
+        imu.begin();        
+        frontToFSensor.begin();
+        compass.begin();
+    #endif
 
     btnUp.begin();
     btnSelect.begin();
@@ -140,6 +140,7 @@ void setup()
     );
 
     buzzer.beep(5);
+
     menu.begin();
 }
 

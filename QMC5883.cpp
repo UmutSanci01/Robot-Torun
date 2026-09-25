@@ -3,46 +3,56 @@
 QMC5883::QMC5883() {
     mX = 0; mY = 0; mZ = 0;
     isCalibrating = false;
+    _wire = &Wire;
 }
 
-void QMC5883::begin() {
-    Wire.beginTransmission(ADDR);
-    Wire.write(0x0A);
-    Wire.write(0xCF);
-    Wire.endTransmission();
+void QMC5883::begin(TwoWire* wire) {
+    _wire = wire;
+    _wire->beginTransmission(ADDR);
+    _wire->write(0x0A);
+    _wire->write(0xCF);
+    _wire->endTransmission();
     Serial.println("QMC5883P Class: Dogru register ile baslatildi.");
 }
 
 void QMC5883::update() {
-    Wire.beginTransmission(ADDR);
-    Wire.write(0x09); 
-    Wire.endTransmission(false);
-    Wire.requestFrom(ADDR, (uint8_t)1);
+    _wire->beginTransmission(ADDR);
+    _wire->write(0x09); 
+    _wire->endTransmission(false);
+    _wire->requestFrom(ADDR, (uint8_t)1);
     
-    if (!Wire.available()) return;
-    uint8_t status = Wire.read();
+    if (!_wire->available()) return;
+    uint8_t status = _wire->read();
 
     if (status & 0x01) {
-        Wire.beginTransmission(ADDR);
-        Wire.write(0x01);
-        Wire.endTransmission(false);
-        Wire.requestFrom(ADDR, (uint8_t)6);
+        _wire->beginTransmission(ADDR);
+        _wire->write(0x01);
+        _wire->endTransmission(false);
+        _wire->requestFrom(ADDR, (uint8_t)6);
         
-        if (Wire.available() >= 6) {
-            uint8_t x_lsb = Wire.read();
-            uint8_t x_msb = Wire.read();
-            uint8_t y_lsb = Wire.read();
-            uint8_t y_msb = Wire.read();
-            uint8_t z_lsb = Wire.read();
-            uint8_t z_msb = Wire.read();
+        if (_wire->available() >= 6) {
+            uint8_t x_lsb = _wire->read();
+            uint8_t x_msb = _wire->read();
+            uint8_t y_lsb = _wire->read();
+            uint8_t y_msb = _wire->read();
+            uint8_t z_lsb = _wire->read();
+            uint8_t z_msb = _wire->read();
 
             int16_t raw_x = (int16_t)((x_msb << 8) | x_lsb);
             int16_t raw_y = (int16_t)((y_msb << 8) | y_lsb);
             int16_t raw_z = (int16_t)((z_msb << 8) | z_lsb);
 
-            float mag_x = (float)raw_y;
-            float mag_y = (float)raw_x;
+            float mag_x, mag_y;
             float mag_z = (float)raw_z;
+
+            // mag_x = front, mag_y = left
+            #if TARGET_ROBOT == 1
+                mag_x = (float)-raw_y;
+                mag_y = (float)-raw_x;
+            #elif TARGET_ROBOT == 2
+                mag_x = (float)-raw_x;
+                mag_y = (float)raw_y;
+            #endif
 
             if (isCalibrating) {
                 if (mag_x < minX) minX = mag_x;

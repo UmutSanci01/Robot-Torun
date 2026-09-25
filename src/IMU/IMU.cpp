@@ -1,40 +1,41 @@
 #include "..\..\lib\IMU\IMU.h"
-#include "..\..\config.h"
 
 IMU::IMU()
     :
     initialized_(false)
 {
     gyroBias_.clear();
-
     lastUpdateUs_ = 0;
     deltaTime_ = 0.0f;
+    _wire = &Wire;
 }
 
-bool IMU::begin()
+bool IMU::begin(TwoWire* wire)
 {
-    Wire.begin(
-        Config::I2C_SDA_PIN,
-        Config::I2C_SCL_PIN
-    );
+    _wire = wire;
+    // Wire.begin(
+    //     Config::I2C_SDA_PIN,
+    //     Config::I2C_SCL_PIN
+    // );
 
-    Wire.setClock(
-        Config::I2C_CLOCK
-    );
+    // Wire.setClock(
+    //     Config::I2C_CLOCK
+    // );
 
-    if (!sensor_.init())
-    {
-        initialized_ = false;
-        return false;
-    }
+    #if TARGET_ROBOT == 1
+        if (!sensor_.init()) {
+            initialized_ = false;
+            return false;
+        }
+        sensor_.setAccRange(MPU9250_ACC_RANGE_2G);
+        sensor_.setGyrRange(MPU9250_GYRO_RANGE_1000);
+        sensor_.enableGyrDLPF();
+        sensor_.setGyrDLPF(MPU9250_DLPF_3);
 
-    sensor_.setAccRange(MPU9250_ACC_RANGE_2G);
-
-    sensor_.setGyrRange(MPU9250_GYRO_RANGE_1000);
-
-    sensor_.enableGyrDLPF();
-
-    sensor_.setGyrDLPF(MPU9250_DLPF_3);
+    #elif TARGET_ROBOT == 2
+        if (sensor_.softReset() != BMI160_OK) return false;
+        sensor_.I2cInit(Config::BMI160_ADDRESS);
+    #endif
 
     filter_.begin(IMUConfig::UPDATE_RATE_HZ);
 
@@ -54,22 +55,29 @@ bool IMU::update()
 
     uint32_t now = micros();
 
-    deltaTime_ =
-        (now - lastUpdateUs_) *
-        1.0e-6f;
+    deltaTime_ = (now - lastUpdateUs_) * 1.0e-6f;
 
     lastUpdateUs_ = now;
 
-    xyzFloat acc = sensor_.getGValues();
-    xyzFloat gyr = sensor_.getGyrValues();
+    #if TARGET_ROBOT == 1
+        xyzFloat acc = sensor_.getGValues();
+        xyzFloat gyr = sensor_.getGyrValues();
+        accel_.x = acc.x; accel_.y = acc.y; accel_.z = acc.z;
+        gyro_.x = gyr.x - gyroBias_.x;
+        gyro_.y = gyr.y - gyroBias_.y;
+        gyro_.z = gyr.z - gyroBias_.z;
+    #elif TARGET_ROBOT == 2
+        int16_t rawData[6] = {0};
+        sensor_.getAccelGyroData(rawData);
 
-    accel_.x = acc.x;
-    accel_.y = acc.y;
-    accel_.z = acc.z;
+        accel_.x = rawData[3] / 16384.0f;
+        accel_.y = rawData[4] / 16384.0f;
+        accel_.z = rawData[5] / 16384.0f;
 
-    gyro_.x = gyr.x - gyroBias_.x;
-    gyro_.y = gyr.y - gyroBias_.y;
-    gyro_.z = gyr.z - gyroBias_.z;
+        gyro_.x = (rawData[0] / 131.0f) - gyroBias_.x;
+        gyro_.y = (rawData[1] / 131.0f) - gyroBias_.y;
+        gyro_.z = (rawData[2] / 131.0f) - gyroBias_.z;
+    #endif
 
     gyro_.x = (gyro_.x > -0.50f && gyro_.x < 0.50f) ? 0.0f : gyro_.x;
     gyro_.y = (gyro_.y > -0.50f && gyro_.y < 0.50f) ? 0.0f : gyro_.y;
@@ -101,16 +109,26 @@ bool IMU::calibrate()
 
     gyroBias_.clear();
 
-    for(uint16_t i = 0; i < IMUConfig::CALIBRATION_SAMPLES; i++)
-    {
-        xyzFloat gyr = sensor_.getGyrValues();
-
-        gyroBias_.x += gyr.x;
-        gyroBias_.y += gyr.y;
-        gyroBias_.z += gyr.z;
-
-        delay(2);
-    }
+    #if TARGET_ROBOT == 1
+        for(uint16_t i = 0; i < IMUConfig::CALIBRATION_SAMPLES; i++) {
+            xyzFloat gyr = sensor_.getGyrValues();
+            gyroBias_.x += gyr.x;
+            gyroBias_.y += gyr.y;
+            gyroBias_.z += gyr.z;
+            delay(15);
+        }
+    #elif TARGET_ROBOT == 2
+        for(uint16_t i = 0; i < IMUConfig::CALIBRATION_SAMPLES; i++) {
+            int16_t rawData[6] = {0};
+            sensor_.getAccelGyroData(rawData);
+            
+            gyroBias_.x += (rawData[0] / 131.0f);
+            gyroBias_.y += (rawData[1] / 131.0f);
+            gyroBias_.z += (rawData[2] / 131.0f);
+            
+            delay(15);
+        }
+    #endif
 
     gyroBias_.x /= IMUConfig::CALIBRATION_SAMPLES;
     gyroBias_.y /= IMUConfig::CALIBRATION_SAMPLES;

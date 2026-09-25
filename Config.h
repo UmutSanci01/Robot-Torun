@@ -6,7 +6,7 @@
     Hardware Configuration
 ----------------------------------------------------------*/
 
-#define TARGET_ROBOT 1
+#define TARGET_ROBOT 2
 
 namespace Config
 {
@@ -16,6 +16,7 @@ namespace Config
     constexpr uint32_t I2C_CLOCK = 400000UL;
 
     constexpr uint8_t MPU6500_ADDRESS = 0x68;
+    constexpr uint8_t BMI160_ADDRESS = 0x69;
 
     constexpr float kp = 2.f, ki = 14.f, kd = 0.002f;
 }
@@ -29,5 +30,5 @@ namespace IMUConfig
     constexpr float UPDATE_RATE_HZ = 200.0f;
     constexpr float UPDATE_PERIOD = 1.0f / UPDATE_RATE_HZ;
 
-    constexpr uint16_t CALIBRATION_SAMPLES = 2000;
+    constexpr uint16_t CALIBRATION_SAMPLES = 600;
 }

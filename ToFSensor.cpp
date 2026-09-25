@@ -5,21 +5,22 @@ ToFSensor::ToFSensor(uint8_t i2c_address) {
     lastReadTime = 0;
     lastDistance = 0;
     isInitialized = false;
+    _wire = &Wire;
 }
 
-bool ToFSensor::begin() {
-    Wire.beginTransmission(address);
-    Wire.write(0xC0);
-    if (Wire.endTransmission(false) == 0) {
-        Wire.requestFrom((uint8_t)address, (uint8_t)1);
-        if (Wire.available()) {
-            uint8_t id = Wire.read();
+bool ToFSensor::begin(TwoWire* wire) {
+    _wire->beginTransmission(address);
+    _wire->write(0xC0);
+    if (_wire->endTransmission(false) == 0) {
+        _wire->requestFrom((uint8_t)address, (uint8_t)1);
+        if (_wire->available()) {
+            uint8_t id = _wire->read();
             if (id == 0xEE) {
                 // Sürekli ölçüm modunu başlat
-                Wire.beginTransmission(address);
-                Wire.write(0x00);
-                Wire.write(0x02);
-                Wire.endTransmission();
+                _wire->beginTransmission(address);
+                _wire->write(0x00);
+                _wire->write(0x02);
+                _wire->endTransmission();
                 isInitialized = true;
                 return true;
             }
@@ -34,13 +35,13 @@ void ToFSensor::update() {
     if (millis() - lastReadTime >= READ_INTERVAL) {
         lastReadTime = millis();
 
-        Wire.beginTransmission(address);
-        Wire.write(0x1E);
-        Wire.endTransmission(false);
+        _wire->beginTransmission(address);
+        _wire->write(0x1E);
+        _wire->endTransmission(false);
 
-        Wire.requestFrom((uint8_t)address, (uint8_t)2);
-        if (Wire.available() >= 2) {
-            uint16_t raw_dist = (Wire.read() << 8) | Wire.read();
+        _wire->requestFrom((uint8_t)address, (uint8_t)2);
+        if (_wire->available() >= 2) {
+            uint16_t raw_dist = (_wire->read() << 8) | _wire->read();
 
             const uint16_t OFFSET = 50; 
             
