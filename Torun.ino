@@ -17,22 +17,36 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
-SemaphoreHandle_t i2cMutex;
+#if TARGET_ROBOT == 1
+    SemaphoreHandle_t i2cMutex;
+    #define LOCK_I2C() (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE)
+    #define UNLOCK_I2C() xSemaphoreGive(i2cMutex)
+    
+    Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+    
+    Motor leftMotor(26, 25, 14, 0);
+    Motor rightMotor(32, 33, 14, 1);
+    Encoder leftEncoder(34, 35, PCNT_UNIT_0);
+    Encoder rightEncoder(39, 36, PCNT_UNIT_1);
 
-Adafruit_SSD1306 display(
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    &Wire,
-    -1);
+#elif TARGET_ROBOT == 2
+    TwoWire I2C_OLED = TwoWire(0);
+    TwoWire I2C_SENSORS = TwoWire(1);
+    
+    #define LOCK_I2C() (true)
+    #define UNLOCK_I2C() 
+    
+    Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &I2C_OLED, -1);
+    
+    Motor leftMotor(25, 26, 14, 0); 
+    Motor rightMotor(27, 14, 14, 1);
+    Encoder leftEncoder(34, 35, PCNT_UNIT_0);
+    Encoder rightEncoder(32, 33, PCNT_UNIT_1);
+#endif
 
 Button btnUp(5);
 Button btnSelect(18);
 Buzzer buzzer(4);
-
-Motor leftMotor(26, 25, 14, 0);
-Motor rightMotor(32, 33, 14, 1);
-Encoder leftEncoder(34, 35, PCNT_UNIT_0);
-Encoder rightEncoder(39, 36, PCNT_UNIT_1);
 ToFSensor frontToFSensor;
 QMC5883 compass;
 
@@ -64,21 +78,31 @@ void ControlTask(void *pvParameters);
 void setup()
 {
     delay(1000); // It waits one second to ignore initial vibrations and better calibrate for IMU.
-
     Serial.begin(115200);
 
+#if TARGET_ROBOT == 1
     Wire.begin();
     Wire.setClock(400000);
-
     i2cMutex = xSemaphoreCreateMutex();
+    
+    frontToFSensor.begin();
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    imu.begin();
+    compass.begin();
 
-    if (!frontToFSensor.begin()) {
-        Serial.println("There is no ToF Sensor!");
-    }
-
-    display.begin(
-        SSD1306_SWITCHCAPVCC,
-        0x3C);
+#elif TARGET_ROBOT == 2
+    I2C_OLED.begin(21, 22);
+    I2C_OLED.setClock(400000);
+    
+    I2C_SENSORS.begin(18, 19);
+    I2C_SENSORS.setClock(400000);
+    
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    
+    frontToFSensor.begin(&I2C_SENSORS);
+    imu.begin(&I2C_SENSORS);
+    compass.begin(&I2C_SENSORS);
+#endif
 
     btnUp.begin();
     btnSelect.begin();
@@ -95,11 +119,6 @@ void setup()
     leftEncoder.setWheelDiameter(0.04438f);
     rightEncoder.setWheelDiameter(0.04438f);
 
-    if (!imu.begin())
-    {
-        Serial.println("IMU not found.");
-    }
-
     if (!imu.calibrate())
     {
         Serial.println("IMU could not calibrate.");
@@ -109,8 +128,6 @@ void setup()
     drive.stop();
     drive.enable();
     drive.setPIDTunings(Config::kp, Config::ki, Config::kd);
-
-    compass.begin();
 
     xTaskCreatePinnedToCore(
         ControlTask,
@@ -151,9 +168,9 @@ void loop()
     
     if (!drive.turning() && !drive.driving())
     {
-        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+        if (LOCK_I2C()) {
             menu.update();
-            xSemaphoreGive(i2cMutex);
+            UNLOCK_I2C();
         }
     }
     else
@@ -176,13 +193,13 @@ void ControlTask(void *pvParameters) {
         leftEncoder.update();
         rightEncoder.update();
 
-        if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+        if (LOCK_I2C()) {
             imu.update();
             compass.update();
             // printMangneto();
             frontToFSensor.update();
 
-            xSemaphoreGive(i2cMutex);
+            UNLOCK_I2C();
         }
         
 

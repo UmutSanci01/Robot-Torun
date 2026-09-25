@@ -6,6 +6,8 @@
     Hardware Configuration
 ----------------------------------------------------------*/
 
+#define TARGET_ROBOT 1
+
 namespace Config
 {
     constexpr uint8_t I2C_SDA_PIN = 21;
