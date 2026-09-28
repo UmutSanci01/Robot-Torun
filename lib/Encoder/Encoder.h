@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <driver/pcnt.h>
+#include "../../Config.h"
 
 class Encoder
 {
@@ -80,13 +81,6 @@ private:
     static void IRAM_ATTR isr1();
 
     void IRAM_ATTR handleInterrupt();
-
-    static constexpr float GEAR_RATIO = 210.0f;
-    static constexpr float PPR = 7.0f;
-    static constexpr float QUAD = 4.0f;
-
-    static constexpr float TICKS_PER_REV =
-        GEAR_RATIO * PPR * QUAD;
 
     static void IRAM_ATTR pcntOverflowIsr(void *arg);
 };

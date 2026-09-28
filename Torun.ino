@@ -38,9 +38,9 @@
     
     Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &I2C_OLED, -1);
     
-    Motor leftMotor(25, 26, 14, 0); 
-    Motor rightMotor(27, 14, 14, 1);
-    Encoder leftEncoder(34, 35, PCNT_UNIT_0);
+    Motor leftMotor(25, 26, 12, 0); 
+    Motor rightMotor(14, 27, 12, 1);
+    Encoder leftEncoder(35, 34, PCNT_UNIT_0);
     Encoder rightEncoder(32, 33, PCNT_UNIT_1);
     Button btnSelect(23);
 
@@ -114,12 +114,6 @@ void setup()
     leftEncoder.begin();
     rightEncoder.begin();
 
-    leftEncoder.setTicksPerRevolution(5925.0f);
-    rightEncoder.setTicksPerRevolution(5925.0f);
-
-    leftEncoder.setWheelDiameter(0.04438f);
-    rightEncoder.setWheelDiameter(0.04438f);
-
     if (!imu.calibrate())
     {
         Serial.println("IMU could not calibrate.");
@@ -145,28 +139,10 @@ void setup()
     menu.begin();
 }
 
-// void printOffsets()
-// {
-//     Serial.print("H_X "); Serial.print(compass.hardOffsetX);
-//     Serial.print(" H_Y "); Serial.print(compass.hardOffsetY);
-//     Serial.print(" H_Z "); Serial.println(compass.hardOffsetZ);
-
-//     Serial.print("S_X "); Serial.print(compass.softScaleX);
-//     Serial.print(" S_Y "); Serial.print(compass.softScaleY);
-//     Serial.print(" S_Z "); Serial.println(compass.softScaleZ);
-// }
-
 void loop()
 {
     btnUp.update();
     btnSelect.update();
-    
-    // if (btnUp.click) {
-    //     if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
-    //         printOffsets();
-    //         xSemaphoreGive(i2cMutex);
-    //     }
-    // }
     
     if (!drive.turning() && !drive.driving())
     {
@@ -183,13 +159,6 @@ void loop()
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-// void printMangneto()
-// {
-//     Serial.print("M_X "); Serial.print(compass.getX());
-//     Serial.print(" M_Y "); Serial.print(compass.getY());
-//     Serial.print(" M_Z "); Serial.println(compass.getZ());
-// }
-
 void ControlTask(void *pvParameters) {
     for(;;) {
         leftEncoder.update();
@@ -198,7 +167,6 @@ void ControlTask(void *pvParameters) {
         if (LOCK_I2C()) {
             imu.update();
             compass.update();
-            // printMangneto();
             frontToFSensor.update();
 
             UNLOCK_I2C();

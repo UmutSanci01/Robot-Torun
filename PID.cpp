@@ -1,5 +1,4 @@
 #include "PID.h"
-#include <Arduino.h>
 
 PID::PID(
     float kp,

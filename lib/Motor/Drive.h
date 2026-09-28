@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "Motor.h"
 #include "..\Encoder\Encoder.h"
-#include "MotorConfig.h"
+#include "../../Config.h"
 #include "../../PID.h"
 #include "../../lib/IMU/IMU.h"
 

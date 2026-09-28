@@ -13,14 +13,6 @@ IMU::IMU()
 bool IMU::begin(TwoWire* wire)
 {
     _wire = wire;
-    // Wire.begin(
-    //     Config::I2C_SDA_PIN,
-    //     Config::I2C_SCL_PIN
-    // );
-
-    // Wire.setClock(
-    //     Config::I2C_CLOCK
-    // );
 
     #if TARGET_ROBOT == 1
         if (!sensor_.init()) {

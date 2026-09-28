@@ -5,57 +5,13 @@ Encoder* Encoder::instance1_ = nullptr;
 
 Encoder::Encoder(uint8_t pinA, uint8_t pinB, pcnt_unit_t unit)
     : pinA_(pinA), pinB_(pinB), pcntUnit_(unit), initialized_(false),
-      previousUpdateMs_(0), ticksPerRevolution_(1.0f), wheelDiameter_(1.0f),
+      previousUpdateMs_(0), 
+      ticksPerRevolution_(EncoderConfig::TICKS_PER_REV), 
+      wheelDiameter_(EncoderConfig::DIAMETER),
       previousPosition_(0), delta_(0), rpm_(0.0f), velocity_(0.0f),
       distance_(0.0f), overflowCount_(0)
 {
 }
-
-// bool Encoder::begin()
-// {
-//     pinMode(pinA_, INPUT_PULLUP);
-//     pinMode(pinB_, INPUT_PULLUP);
-
-//     previousState_ =
-//         (digitalRead(pinA_) << 1) |
-//         digitalRead(pinB_);
-
-//     if (instance0_ == nullptr)
-//     {
-//         instance0_ = this;
-//         instanceIndex_ = 0;
-
-//         attachInterrupt(
-//             digitalPinToInterrupt(pinA_),
-//             isr0,
-//             CHANGE);
-
-//         attachInterrupt(
-//             digitalPinToInterrupt(pinB_),
-//             isr0,
-//             CHANGE);
-//     }
-//     else
-//     {
-//         instance1_ = this;
-//         instanceIndex_ = 1;
-
-//         attachInterrupt(
-//             digitalPinToInterrupt(pinA_),
-//             isr1,
-//             CHANGE);
-
-//         attachInterrupt(
-//             digitalPinToInterrupt(pinB_),
-//             isr1,
-//             CHANGE);
-//     }
-
-//     previousUpdateMs_ = millis();
-//     initialized_ = true;
-
-//     return true;
-// }
 
 bool Encoder::begin()
 {
@@ -81,8 +37,6 @@ bool Encoder::begin()
     pcnt_config.channel = PCNT_CHANNEL_1;
     pcnt_config.pos_mode = PCNT_COUNT_DEC;
     pcnt_config.neg_mode = PCNT_COUNT_INC;
-    // pcnt_config.lctrl_mode = PCNT_MODE_KEEP;
-    // pcnt_config.hctrl_mode = PCNT_MODE_REVERSE;
     pcnt_config.lctrl_mode = PCNT_MODE_REVERSE; 
     pcnt_config.hctrl_mode = PCNT_MODE_KEEP;
     pcnt_unit_config(&pcnt_config);
@@ -127,31 +81,6 @@ bool Encoder::update()
         previousUpdateMs_ = now;
     }
     return true;
-
-
-    // if (!initialized_)
-    //     return false;
-
-    // uint32_t now = millis();
-    // uint32_t dt = now - previousUpdateMs_;
-
-    // if (dt >= 20)
-    // {
-    //     int32_t current = ticks();
-
-    //     delta_ = current - previousPosition_;
-    //     previousPosition_ = current;
-
-    //     float rev = (float)delta_ / ticksPerRevolution_;
-
-    //     rpm_ = rev * (60000.0f / dt);
-
-    //     velocity_ = rpm_ * (PI * wheelDiameter_) / 60.0f;
-
-    //     previousUpdateMs_ = now;
-    // }
-
-    // return true;
 }
 
 bool Encoder::healthy() const
@@ -164,14 +93,6 @@ int32_t Encoder::position() const
     int16_t hwCount = 0;
     pcnt_get_counter_value(pcntUnit_, &hwCount);
     return overflowCount_ + hwCount;
-
-
-    // noInterrupts();
-    // // int32_t p = position_;
-    // int32_t p = count_;
-    // interrupts();
-
-    // return p;
 }
 
 int32_t Encoder::delta() const
@@ -188,21 +109,6 @@ float Encoder::velocity() const
 {
     return velocity_;
 }
-
-// float Encoder::distance() const
-// {
-//     return distance_;
-// }
-
-// void Encoder::reset()
-// {
-//     position_ = 0;
-//     previousPosition_ = 0;
-//     delta_ = 0;
-//     rpm_ = 0.0f;
-//     velocity_ = 0.0f;
-//     distance_ = 0.0f;
-// }
 
 void IRAM_ATTR Encoder::isr0()
 {
@@ -267,13 +173,6 @@ int32_t Encoder::ticks() const
     // return count_;
 }
 
-// void Encoder::reset()
-// {
-//     noInterrupts();
-//     count_ = 0;
-//     interrupts();
-// }
-
 void Encoder::reset()
 {
     pcnt_counter_pause(pcntUnit_);
@@ -287,18 +186,6 @@ void Encoder::reset()
     distance_ = 0.0f;
     
     pcnt_counter_resume(pcntUnit_);
-
-
-    // noInterrupts();
-    // count_ = 0;
-    // interrupts();
-
-    // position_ = 0;
-    // previousPosition_ = 0;
-    // delta_ = 0;
-    // rpm_ = 0.0f;
-    // velocity_ = 0.0f;
-    // distance_ = 0.0f;
 }
 
 float Encoder::revolutions() const

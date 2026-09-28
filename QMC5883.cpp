@@ -47,8 +47,8 @@ void QMC5883::update() {
 
             // mag_x = front, mag_y = left
             #if TARGET_ROBOT == 1
-                mag_x = (float)-raw_y;
-                mag_y = (float)-raw_x;
+                mag_x = (float)raw_x;
+                mag_y = (float)raw_y;
             #elif TARGET_ROBOT == 2
                 mag_x = (float)raw_y;
                 mag_y = (float)-raw_x;
