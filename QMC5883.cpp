@@ -1,6 +1,9 @@
 #include "QMC5883.h"
 
-QMC5883::QMC5883() {
+QMC5883::QMC5883(Preferences& pref) 
+:
+_pref(pref) 
+{
     mX = 0; mY = 0; mZ = 0;
     isCalibrating = false;
     _wire = &Wire;
@@ -13,6 +16,8 @@ void QMC5883::begin(TwoWire* wire) {
     _wire->write(0xCF);
     _wire->endTransmission();
     Serial.println("QMC5883P Class: Dogru register ile baslatildi.");
+
+    loadCalibration();
 }
 
 void QMC5883::update() {
@@ -110,6 +115,7 @@ void QMC5883::finishCalibration() {
     softScaleZ = avg_chord / chordZ;
     
     setCalibration(hardOffsetX, hardOffsetY, hardOffsetZ, softScaleX, softScaleY, softScaleZ);
+    saveCalibration(hardOffsetX, hardOffsetY, hardOffsetZ, softScaleX, softScaleY, softScaleZ);
     // Serial.println("--- CALIBRATION COMPLETED ---");
     // Serial.printf("Hard Iron Offsets -> X: %.2f | Y: %.2f | Z: %.2f\n", hardOffsetX, hardOffsetY, hardOffsetZ);
     // Serial.printf("Soft Iron Scales  -> X: %.2f | Y: %.2f | Z: %.2f\n", softScaleX, softScaleY, softScaleZ);
@@ -118,4 +124,43 @@ void QMC5883::finishCalibration() {
 void QMC5883::setCalibration(float hx, float hy, float hz, float sx, float sy, float sz) {
     hardOffsetX = hx; hardOffsetY = hy; hardOffsetZ = hz;
     softScaleX = sx; softScaleY = sy; softScaleZ = sz;
+}
+
+void QMC5883::saveCalibration(float hx, float hy, float hz, float sx, float sy, float sz)
+{
+    _pref.begin("compass_cal", false); 
+
+    _pref.putFloat("hx_off", hx);
+    _pref.putFloat("hy_off", hy);
+    _pref.putFloat("hz_off", hz);
+    _pref.putFloat("sx_off", sx);
+    _pref.putFloat("sy_off", sy);
+    _pref.putFloat("sz_off", sz);
+
+    _pref.putBool("is_calibrated", true);
+
+    _pref.end();
+}
+void QMC5883::loadCalibration()
+{
+    _pref.begin("compass_cal", true); 
+
+    bool isCalibrated = _pref.getBool("is_calibrated", false);
+
+    if (isCalibrated) {
+        float hx = _pref.getFloat("hx_off", 0.0f);
+        float hy = _pref.getFloat("hy_off", 0.0f);
+        float hz = _pref.getFloat("hz_off", 0.0f);
+        float sx = _pref.getFloat("sx_off", 0.0f);
+        float sy = _pref.getFloat("sy_off", 0.0f);
+        float sz = _pref.getFloat("sz_off", 0.0f);
+        
+        // setCalibration(hx, hy, hz, sx, sy, sz);
+        hardOffsetX = hx; hardOffsetY = hy; hardOffsetZ = hz;
+        softScaleX = sx; softScaleY = sy; softScaleZ = sz;
+    } else {    
+        Serial.println("Calibration not found.");
+    }
+
+    _pref.end();
 }

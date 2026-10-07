@@ -3,12 +3,14 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <Preferences.h>
 #include "Config.h"
 
 class QMC5883 {
 private:
     const uint8_t ADDR = 0x2C;
     TwoWire* _wire;
+    Preferences& _pref;
 
     // Hard Iron Offsets
     float hardOffsetX = 0.0f;
@@ -25,8 +27,11 @@ private:
     bool isCalibrating;
     float minX, maxX, minY, maxY, minZ, maxZ;
 
+    void saveCalibration(float hx, float hy, float hz, float sx, float sy, float sz);
+    void loadCalibration();
+    
 public:
-    QMC5883();
+    QMC5883(Preferences& pref);
     void begin(TwoWire* wire = &Wire);
     void update();
     

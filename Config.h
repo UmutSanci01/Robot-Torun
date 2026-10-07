@@ -6,7 +6,7 @@
     Hardware Configuration
 ----------------------------------------------------------*/
 
-#define TARGET_ROBOT 1
+#define TARGET_ROBOT 2
 
 namespace Config
 {

@@ -3,6 +3,7 @@
 #include <Adafruit_SSD1306.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <Preferences.h>
 
 #include "lib\Motor\Motor.h"
 #include "Button.h"
@@ -13,6 +14,9 @@
 #include "ToFSensor.h"
 #include "Buzzer.h"
 #include "QMC5883.h"
+
+#define RW_MODE false
+#define RO_MODE true
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -49,7 +53,10 @@
 Button btnUp(5);
 Buzzer buzzer(4);
 ToFSensor frontToFSensor;
-QMC5883 compass;
+Preferences pref;
+QMC5883 compass(
+    pref
+);
 
 Drive drive(
     leftMotor,
@@ -89,7 +96,6 @@ void setup()
         frontToFSensor.begin();
         display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
         imu.begin();
-        compass.begin();
 
     #elif TARGET_ROBOT == 2
         I2C_OLED.begin(21, 22); 
@@ -102,9 +108,9 @@ void setup()
         
         imu.begin();        
         frontToFSensor.begin();
-        compass.begin();
     #endif
 
+    compass.begin();
     btnUp.begin();
     btnSelect.begin();
 
